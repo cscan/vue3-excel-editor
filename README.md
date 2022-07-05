@@ -31,16 +31,19 @@ For Vue 2 version, please refer to the repository: https://github.com/cscan/vue-
 Get the package:
 
 ```bash
-npm install vue-excel-editor
+npm install vue3-excel-editor
 ```
 
 Register VueExcelEditor in your app entrypoint:
 
 ```js
-import Vue from 'vue'
-import VueExcelEditor from 'vue-excel-editor'
+import { createApp } from 'vue'
+import App from './App.vue'
+import VueExcelEditor from 'vue3-excel-editor'
 
-Vue.use(VueExcelEditor)
+const app = createApp(App)
+app.use(VueExcelEditor)
+...
 ```
 
 In your template
