@@ -876,4 +876,4 @@ MIT
 
 ## Status
 
-Thanks to reinerBa in helping to migrate to Vue3. This project is in an early stage of development. Any contribution is welcome. :D
+Thanks to edutucci and reinerBa in helping to migrate to Vue3. This project is in an early stage of development. Any contribution is welcome. :D
