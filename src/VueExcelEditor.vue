@@ -281,6 +281,7 @@ import PanelSetting from './PanelSetting.vue'
 import PanelFind from './PanelFind.vue'
 import DatePicker from '@vuepic/vue-datepicker'
 import {read, writeFile, utils} from 'xlsx'
+import moment from 'moment'
 
 import '@vuepic/vue-datepicker/dist/main.css'
 
@@ -1053,9 +1054,25 @@ export default {
       })
     },
     datepickerClick () {
-      this.inputBox.value = this.inputDateTime
+      const m = moment(this.inputDateTime)
+      switch(this.currentField.type) {
+        case 'date':
+          this.inputBox.value = m.format('YYYY-MM-DD')
+          break
+        case 'datetime':
+          this.inputBox.value = m.format('YYYY-MM-DD hh:mn:00')
+          break
+	case 'datetimesec':
+          this.inputBox.value = m.format('YYYY-MM-DD hh:mn:ss')
+          break
+	case 'datetick':
+	case 'datetimetick':
+	case 'datetimesectick':
+          this.inputBox.value = m.valueOf()
+          break
+      }
       this.inputBoxShow = 0
-      this.inputCellWrite(this.inputDateTime)
+      this.inputCellWrite(this.inputBox.value)
       this.showDatePicker = false
       this.focused = true
     },
