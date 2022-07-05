@@ -171,7 +171,7 @@
 
         <!-- Date Picker -->
         <div ref="dpContainer" v-show="showDatePicker" style="z-index:20; position:fixed">
-          <date-picker ref="datepicker" inline v-model="inputDateTime" @input="datepickerClick" valueType="format"></date-picker>
+          <date-picker ref="datepicker" inline auto-apply v-model="inputDateTime" @update:modelValue="datepickerClick" valueType="format"></date-picker>
         </div>
 
         <!-- Waiting scene -->
@@ -279,10 +279,10 @@ import VueExcelFilter from './VueExcelFilter.vue'
 import PanelFilter from './PanelFilter.vue'
 import PanelSetting from './PanelSetting.vue'
 import PanelFind from './PanelFind.vue'
-import DatePicker from 'vue3-datepicker'
-import XLSX from 'xlsx'
+import DatePicker from '@vuepic/vue-datepicker'
+import {read, writeFile, utils} from 'xlsx'
 
-import 'vue2-datepicker/index.css'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 export default {
   components: {
@@ -1041,7 +1041,7 @@ export default {
       const cellRect = this.currentCell.getBoundingClientRect()
       this.$refs.dpContainer.style.left = (cellRect.left) + 'px'
       this.$refs.dpContainer.style.top = (cellRect.bottom) + 'px'
-      this.inputDateTime = this.currentCell.textContent
+      this.inputDateTime = new Date(this.currentCell.textContent)
       this.showDatePicker = true
       this.lazy(() => {
         if (!this.$refs.dpContainer) return
@@ -1771,9 +1771,9 @@ export default {
         fileReader.onload = async (e) => {
           try {
             const data = e.target.result
-            const wb = XLSX.read(data, {type: 'binary', cellDates: true, cellStyle: false})
+            const wb = read(data, {type: 'binary', cellDates: true, cellStyle: false})
             const sheet = wb.SheetNames[0]
-            let importData = XLSX.utils.sheet_to_row_object_array(wb.Sheets[sheet])
+            let importData = utils.sheet_to_row_object_array(wb.Sheets[sheet])
             importData = importData.filter(rec => Object.keys(rec).length > 0).map((rec) => {
               if (rec.key_1) {
                 rec.key = rec.key_1  // Fixed the XLSX issue where key is set to be reserved word
@@ -1916,7 +1916,7 @@ export default {
     exportTable (format, selectedOnly, filename) {
       this.processing = true
       setTimeout(() => {
-        const wb = XLSX.utils.book_new()
+        const wb = utils.book_new()
         let ws1 = null
         let data = this.table
         if (selectedOnly)
@@ -1926,17 +1926,17 @@ export default {
           this.fields.forEach(field => conv[field.name] = rec[field.name])
           return conv
         })
-        ws1 = XLSX.utils.json_to_sheet(mapped, {
+        ws1 = utils.json_to_sheet(mapped, {
           header: this.fields.map(field => field.name)
         })
         const labels = Array.from(this.labelTr.children).slice(1).map(t => t.children[0].innerText)
-        XLSX.utils.sheet_add_aoa(ws1, [labels], {origin: 0})
+        utils.sheet_add_aoa(ws1, [labels], {origin: 0})
         ws1['!cols'] = Array.from(this.labelTr.children).slice(1).map((t) => {
           return {
             width: t.getBoundingClientRect().width / 6.5
           }
         })
-        XLSX.utils.book_append_sheet(wb, ws1, 'Sheet1')
+        utils.book_append_sheet(wb, ws1, 'Sheet1')
         filename = filename || 'export'
         switch (format) {
           case 'csv':
@@ -1952,14 +1952,14 @@ export default {
             break
         }
         if (filename.endsWith('.xlsx'))
-          XLSX.writeFile(wb, filename, {
+          writeFile(wb, filename, {
             compression: 'DEFLATE',
             compressionOptions: {
               level: 6
             }
           })
         else
-          XLSX.writeFile(wb, filename)
+          writeFile(wb, filename)
 
         this.processing = false
       }, 500)

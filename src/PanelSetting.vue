@@ -19,14 +19,14 @@
         </div>
         <div>
           <div ref="panelList" class="panel-list">
-            <draggable v-model="fields" draggable=".panel-list-item" item-key="fields">
+            <!-- draggable v-model="fields" draggable=".panel-list-item" item-key="fields">
               <div v-for="(item, k) in fields" :key="k"
                    class="panel-list-item"
                    @click.prevent="columnLabelClick($event, item)">
                 <input type="checkbox" :checked="!item.invisible" :disabled="true" class="panel-checkbox">
                 <span>{{ item.label }}</span>
               </div>
-            </draggable>
+            </draggable-->
           </div>
         </div>
       </div>
@@ -46,12 +46,12 @@
 </template>
 
 <script>
-import draggable from 'vuedraggable'
+// import draggable from 'vuedraggable'
 
 export default {
-  components: {
-    'draggable': draggable
-  },
+  // components: {
+  //   'draggable': draggable
+  // },
   props: {
     modelValue: Array,
     localizedLabel: {
