@@ -281,7 +281,6 @@ import PanelSetting from './PanelSetting.vue'
 import PanelFind from './PanelFind.vue'
 import DatePicker from '@vuepic/vue-datepicker'
 import {read, writeFile, utils} from 'xlsx'
-import moment from 'moment'
 
 import '@vuepic/vue-datepicker/dist/main.css'
 
@@ -1054,20 +1053,24 @@ export default {
       })
     },
     datepickerClick () {
-      const m = moment(this.inputDateTime)
+      const offset = new Date().getTimezoneOffset() * 60 * 1000
+      // const m = moment(this.inputDateTime)
       switch(this.currentField.type) {
         case 'date':
-          this.inputBox.value = m.format('YYYY-MM-DD')
+          // this.inputBox.value = m.format('YYYY-MM-DD')
+          this.inputBox.value = new Date(new Date(this.inputDateTime) - offset).toISOString().slice(0, 10)
           break
         case 'datetime':
-          this.inputBox.value = m.format('YYYY-MM-DD hh:mn:00')
+          // this.inputBox.value = m.format('YYYY-MM-DD hh:mn:00')
+          this.inputBox.value = new Date(new Date(this.inputDateTime) - offset).toISOString().replace('T', ' ').slice(0, 16) + ':00'
           break
-	case 'datetimesec':
+        case 'datetimesec':
+          this.inputBox.value = new Date(new Date(this.inputDateTime) - offset).toISOString().replace('T', ' ').slice(0, 19)
           this.inputBox.value = m.format('YYYY-MM-DD hh:mn:ss')
           break
-	case 'datetick':
-	case 'datetimetick':
-	case 'datetimesectick':
+        case 'datetick':
+        case 'datetimetick':
+        case 'datetimesectick':
           this.inputBox.value = m.valueOf()
           break
       }
