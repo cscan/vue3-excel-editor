@@ -1661,7 +1661,7 @@ export default {
                 return String(a[name]).localeCompare(String(b[name]))
               }
         }
-        this.modelValue.sort((a, b) => {
+        this.table.sort((a, b) => {
           return sorting(a, b) * -n
         })
         this.sortPos = colPos
