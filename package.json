@@ -2,7 +2,11 @@
   "name": "vue3-excel-editor",
   "email": "apple.6502@gmail.com",
   "description": "Vue3 plugin for displaying and editing the array-of-object in Excel style",
+<<<<<<< HEAD
   "version": "1.0.16",
+=======
+  "version": "1.0.15",
+>>>>>>> e9aa98d1c495bf530e7057d78de02d2520373bde
   "main": "src/main.js",
   "dependencies": {
     "@vuepic/vue-datepicker": "^3.3.0",
