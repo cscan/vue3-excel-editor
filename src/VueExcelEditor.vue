@@ -23,7 +23,7 @@
               ondragover="event.preventDefault(); event.dataTransfer.dropEffect = 'none'">
           <colgroup>
             <col v-if="!noNumCol" style="width:40px">
-            <col v-for="(item, p) in fields" v-show="!item.invisible" :key="p" :style="{width: item.width, 'min-width': item.minWidth}">
+            <col v-for="(item, p) in fields" v-show="!item.invisible" :key="p" :style="{width: item.width}">
             <col v-if="vScroller.buttonHeight < vScroller.height" style="width:12px">
           </colgroup>
           <thead class="center-text">
@@ -645,7 +645,7 @@ export default {
     },
     resetColumn () {
       this.fields = []
-      this.$slots.default.forEach(col => col.componentInstance? col.componentInstance.init() : 0)
+      // this.$slots.default.forEach(col => col.componentInstance? col.componentInstance.init() : 0)
       this.tableContent.scrollTo(0, this.tableContent.scrollTop)
       this.calStickyLeft()
     },
@@ -1047,7 +1047,7 @@ export default {
         + (this.noNumCol ? 0 : 40)
       const fillWidth = viewWidth - fullWidth + 2
       if (fillWidth)
-        doFields.forEach(f => f.minWidth = (f.width.replace(/px$/, '') - fillWidth / count) + 'px')
+        doFields.forEach(f => f.width = (f.width.replace(/px$/, '') - fillWidth / count) + 'px')
     },
 
     /* *** Date Picker *********************************************************************************
@@ -1666,7 +1666,8 @@ export default {
         })
         this.sortPos = colPos
         this.sortDir = n
-        this.$forceUpdate()
+        this.refresh()
+        // this.$forceUpdate()
         this.processing = false
       }, 0)
     },
