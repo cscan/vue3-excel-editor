@@ -1511,8 +1511,10 @@ export default {
       const getStyleVal = (elm, css) => {
         window.getComputedStyle(elm, null).getPropertyValue(css)
       }
+      const index = Array.from(this.labelTr.children).indexOf(e.target.parentElement)
       this.sep = {}
-      this.sep.curCol = this.colgroupTr.children[Array.from(this.labelTr.children).indexOf(e.target.parentElement)]
+      this.sep.curCol = this.colgroupTr.children[index]
+      this.sep.curField = this.fields[index - 1]
       // this.sep.nxtCol = this.sep.curCol.nextElementSibling
       this.sep.pageX = e.pageX
       let padding = 0
@@ -1558,7 +1560,9 @@ export default {
     colSepMouseMove (e) {
       if (!this.sep || !this.sep.curCol) return
       const diffX = e.pageX - this.sep.pageX
-      this.sep.curCol.style.width = (this.sep.curColWidth + diffX) + 'px'
+      const newWidth = (this.sep.curColWidth + diffX) + 'px'
+      this.sep.curCol.style.width = newWidth
+      this.sep.curField.width = newWidth
       this.lazy(this.calStickyLeft, 200)
     },
     colSepMouseUp (e) {
