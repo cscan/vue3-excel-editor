@@ -511,7 +511,8 @@ export default {
           })
           if (valid) {
             this.fields = newFields
-            this.$forceUpdate()
+            const instance = getCurrentInstance()
+            instance?.proxy?.$forceUpdate()
           }
         }
       }
@@ -890,7 +891,8 @@ export default {
           else if (this.leftMost === -1) this.leftMost = left
         }
       })
-      this.$forceUpdate()
+      const instance = getCurrentInstance()
+      instance?.proxy?.$forceUpdate()
     },
     renderColumnCellStyle (field) {
       let result = field.initStyle
@@ -1110,7 +1112,8 @@ export default {
       this.vScroller.buttonHeight = Math.max(24, this.vScroller.height * ratio)
       const prop = (this.tableContent.scrollTop + this.pageTop * 24) / (this.table.length * 24 - this.vScroller.height)
       this.vScroller.buttonTop = (this.vScroller.height - this.vScroller.buttonHeight) * prop
-      this.$forceUpdate()
+      const instance = getCurrentInstance()
+      instance?.proxy?.$forceUpdate()
     },
     vsMouseDown (e) {
       e.stopPropagation()
@@ -1149,7 +1152,8 @@ export default {
         this.pageTop = Math.round((this.table.length - this.pageSize) * ratio)
       }
       this.vScroller.runner = ''
-      this.$forceUpdate()
+      const instance = getCurrentInstance()
+      instance?.proxy?.$forceUpdate()
     },
     vsbMouseMove (e) {
       if (e.buttons === 0)
@@ -1171,7 +1175,8 @@ export default {
             .filter((field, i) => field.keyField || field.sticky || this.sortPos === i)
             .map(field => field.label + ': ' + rec[field.name])
             .join('<br>')
-          this.$forceUpdate()
+          const instance = getCurrentInstance()
+          instance?.proxy?.$forceUpdate()
         }
       }
     },
@@ -1198,14 +1203,15 @@ export default {
       }
     },
     sbMouseUp () {
-        window.removeEventListener('mousemove', this.sbMouseMove)
-        window.removeEventListener('mouseup', this.sbMouseUp)
-        this.lazy(() => {
-          if (!this.$refs.hScroll) return
-          this.$refs.hScroll.classList.remove('focus')
-        })
-        this.hScroller.mouseX = 0
-        this.$forceUpdate()
+      window.removeEventListener('mousemove', this.sbMouseMove)
+      window.removeEventListener('mouseup', this.sbMouseUp)
+      this.lazy(() => {
+        if (!this.$refs.hScroll) return
+        this.$refs.hScroll.classList.remove('focus')
+      })
+      this.hScroller.mouseX = 0
+      const instance = getCurrentInstance()
+      instance?.proxy?.$forceUpdate()
     },
     sbMouseMove (e) {
       if (e.buttons === 0)
