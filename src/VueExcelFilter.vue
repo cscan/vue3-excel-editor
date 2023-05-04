@@ -48,8 +48,11 @@ export default {
       return ''
     },
     filterRowTop () {
+      /*
       if (this.cell) return {top: this.cell.offsetTop + 'px'}
       else return {}
+      */
+      return {}
     },
   },
   watch: {
