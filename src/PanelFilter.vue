@@ -164,11 +164,11 @@ export default {
     doInputFilter () {
       if (window.delay) clearTimeout(window.delay)
       window.delay = setTimeout(() => {
-        this.inputFilter = this.$refs.inputFilter.modelValue
+        this.inputFilter = this.$refs.inputFilter.value
       }, 200)
     },
     doFilter () {
-      const opt = this.inputFilterCondition + this.$refs.inputFilter.modelValue
+      const opt = this.inputFilterCondition + this.$refs.inputFilter.value
       this.columnFilterRef.$el.textContent = opt
       this.columnFilterRef.$emit('update:modelValue', opt)
       this.hidePanel()
@@ -184,7 +184,7 @@ export default {
       this.inputFilter = ''
       this.inputFilterCondition = ''
       this.sortedUniqueValueList = []
-      this.$refs.inputFilter.modelValue = ''
+      this.$refs.inputFilter.value = ''
       if (this.columnFilterRef.$el.textContent != '') {
         this.columnFilterRef.$el.textContent = ''
         this.columnFilterRef.$emit('update:modelValue', '')
@@ -264,6 +264,7 @@ input:focus, button:focus {
 
 div.panel-title span, button.panel-button span {
   margin-left: 6px;
+  vertical-align: text-top;
 }
 
 .panel-content {
@@ -382,7 +383,7 @@ div.panel-title span, button.panel-button span {
   flex-direction: column;
 }
 .panel-checkbox {
-  vertical-align: 2px;
+  vertical-align: bottom;
 }
 .panel-list span {
   margin-left: 10px;
