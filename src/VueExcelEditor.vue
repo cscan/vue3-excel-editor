@@ -595,6 +595,7 @@ export default defineComponent({
       this.calStickyLeft()
     }, 200)
 
+    if (ResizeObserver) new ResizeObserver(this.winResize).observe(this.tableContent)
     window.addEventListener('resize', this.winResize)
     window.addEventListener('paste', this.winPaste)
     window.addEventListener('keydown', this.winKeydown)
