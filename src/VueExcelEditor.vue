@@ -181,7 +181,7 @@
       </div>
 
       <!-- Vertical Scroll Bar -->
-      <div v-if="vScroller.buttonHeight < vScroller.height"
+      <div v-show="vScroller.buttonHeight < vScroller.height"
            ref="vScroll"
            class="v-scroll"
            :style="{top: `${vScroller.top}px`, height: `${vScroller.height}px`}"
@@ -2507,6 +2507,7 @@ export default defineComponent({
             type: 'd',
             rec: t
           })))
+          this.refresh()
         })
       }, 100)
     },
@@ -3088,6 +3089,7 @@ input:focus, input:active:focus, input.active:focus {
   z-index: 5;
   background-color: white;
   border-left: 1px solid lightgray;
+  border-top: 1px lightgray solid;
   user-select: none;
 }
 .v-scroll-button {
