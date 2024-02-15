@@ -1482,7 +1482,7 @@ export default defineComponent({
               else
                 if (this.currentField.allowKeys.indexOf(e.key.toUpperCase()) === -1) return e.preventDefault()
             }
-            if (this.currentField.lengthLimit && this.inputBox.value.length >= this.currentField.lengthLimit) return e.preventDefault()
+            if (this.inputBoxShow && this.currentField.lengthLimit && this.inputBox.value.length >= this.currentField.lengthLimit) return e.preventDefault()
             if (!this.inputBoxShow) {
               if (this.currentField.type === 'select' || this.currentField.type === 'map') {
                 setTimeout(() => this.calAutocompleteList(true))
