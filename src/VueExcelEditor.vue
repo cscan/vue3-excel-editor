@@ -2622,7 +2622,7 @@ export default defineComponent({
     /* *** Autocomplete ****************************************************************************************
      */
     async calAutocompleteList (force) {
-      if (!force && !this.currentField.autocomplete) return
+      if (!this.currentField.autocomplete) return
       if (force || (this.inputBoxChanged && this.inputBox.value.length > 0)) {
         if (typeof this.recalAutoCompleteList !== 'undefined') clearTimeout(this.recalAutoCompleteList)
         const doList = async () => {
