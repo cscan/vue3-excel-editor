@@ -2666,7 +2666,7 @@ export default defineComponent({
             }
             list.sort()
           }
-          this.autocompleteSelect = list.findIndex(element => element?.toUpperCase().startsWith(value))
+          this.autocompleteSelect = list.findIndex(element => element?.toString().toUpperCase().startsWith(value))
           this.autocompleteInputs = list
           const rect = this.currentCell.getBoundingClientRect()
           this.lazy(() => {
