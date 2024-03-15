@@ -747,6 +747,7 @@ export default defineComponent({
         this.autoRegisterAllColumns(this.modelValue)
       }
       this.calTable()
+      this.calStickyLeft()
       this.refreshPageSize()
     },
     calTable () {
