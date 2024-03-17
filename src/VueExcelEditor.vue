@@ -1088,12 +1088,12 @@ export default defineComponent({
           break
         case 'datetimesec':
           this.inputBox.value = new Date(new Date(this.inputDateTime) - offset).toISOString().replace('T', ' ').slice(0, 19)
-          this.inputBox.value = m.format('YYYY-MM-DD hh:mn:ss')
+          // this.inputBox.value = m.format('YYYY-MM-DD hh:mn:ss')
           break
         case 'datetick':
         case 'datetimetick':
         case 'datetimesectick':
-          this.inputBox.value = m.valueOf()
+          this.inputBox.value = new Date(new Date(this.inputDateTime) - offset).getTime()
           break
       }
       this.inputBoxShow = 0
