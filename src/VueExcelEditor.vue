@@ -1524,7 +1524,7 @@ export default defineComponent({
       const index = Array.from(this.labelTr.children).indexOf(e.target.parentElement)
       this.sep = {}
       // this.sep.curCol = this.colgroupTr.children[Array.from(this.labelTr.children).indexOf(e.target.parentElement)]
-      this.sep.curCol = this.colgroupTr.children[index]
+      this.sep.curCol = this.colgroupTr.children[index - (this.noNumCol ? 1: 0)]
       this.sep.curField = this.fields[index - 1]
       // this.sep.nxtCol = this.sep.curCol.nextElementSibling
       this.sep.pageX = e.pageX
