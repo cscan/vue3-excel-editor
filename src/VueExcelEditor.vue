@@ -2244,10 +2244,14 @@ export default defineComponent({
         const row = e.target.parentNode
         const colPos = Array.from(row.children).indexOf(e.target) - 1
         const rowPos = Array.from(row.parentNode.children).indexOf(row)
+        this.currentField = this.fields[colPos]
         this.$emit('cell-click', {rowPos, colPos})
+        if (typeof this.currentField.cellClick === 'function')
+          this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
         this.moveInputSquare(rowPos, colPos)
         if (this.currentField && this.currentField.link /* && e.altKey */)
           setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
+        if (this.currentField.listByClick) return this.calAutocompleteList(true)
         if (e.target.offsetWidth - e.offsetX > 15) return
         if (this.currentField.readonly) return
         this.inputBox.value = this.currentCell.textContent
@@ -2793,6 +2797,12 @@ input:focus, input:active:focus, input.active:focus {
   font-size: 0.88rem;
   max-width: 300px;
   max-height: 235px;
+  animation: 0.3s ease 0s normal forwards 1 fadein;
+}
+@keyframes fadein {
+  0% { opacity: 0; }
+  66% { opacity: 0; }
+  100% { opacity: 1; }
 }
 .autocomplete-result {
   list-style: none;

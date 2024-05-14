@@ -16,10 +16,12 @@ export default {
     textAlign: {type: String, default: null},
     keyField: {type: Boolean, default: false},
     sticky: {type: Boolean, default: false},
+    listByClick: {type: Boolean, default: null},
 
     validate: {type: Function, default: null},
     change: {type: Function, default: null},
     link: {type: Function, default: null},
+    cellClick: {type: Function, default: null},
     autoFillWidth: {type: Boolean, default: false},
 
     allowKeys: {type: [Array, Function], default () {return null}},
@@ -30,7 +32,7 @@ export default {
     options: {type: [Array, Object, Function], default () {return null}},
     summary: {type: String, default: null},
     sort: {type: Function, default: null},
-    masking: {type: String, default: '*'},
+    masking: {type: String, default: '•'},
     placeholder: {type: String, default: ''},
 
     toValue: {
@@ -205,6 +207,7 @@ export default {
         case 'password':
           break
         case 'action':
+          this._listByClick = true
           break
         default:
           throw new Error('VueExcelColumn: Not supported type:' + this.type)
@@ -259,7 +262,9 @@ export default {
         toValue: this.toValue,
         toText: this.toText,
         register: this.register,
-        placeholder: this.placeholder
+        placeholder: this.placeholder,
+        cellClick: this.cellClick,
+        listByClick: this.listByClick || this._listByClick
       })
     }
   }
