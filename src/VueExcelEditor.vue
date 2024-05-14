@@ -640,6 +640,7 @@ export default defineComponent({
     toggleSelectView (e) {
       if (e) e.stopPropagation()
       this.showSelectedOnly = !this.showSelectedOnly
+      this.firstPage()
       return this.refresh()
     },
     toggleFilterView (e) {
@@ -1293,6 +1294,13 @@ export default defineComponent({
     },
     winKeyup (e) {
       if (!e.altKey) this.systable.classList.remove('alt')
+      if (this.inputBoxShow && this.currentField.type === 'password') {
+        setTimeout(() => {
+          const v = this.inputBox.value.split('').map((c, i) => c === this.currentField.masking ? this.inputBox._value[i] : c)
+          this.inputBox._value = v.join('')
+          this.inputBox.value = this.currentField.masking.repeat(v.length)
+        })
+      }
     },
     winKeydown (e) {
       if (e.altKey) this.systable.classList.add('alt')
@@ -1485,7 +1493,7 @@ export default defineComponent({
             }
             if (this.inputBoxShow && this.currentField.lengthLimit && this.inputBox.value.length >= this.currentField.lengthLimit) return e.preventDefault()
             if (!this.inputBoxShow) {
-              if (this.currentField.type === 'select' || this.currentField.type === 'map') {
+              if (['select', 'map', 'action'].includes(this.currentField.type)) {
                 setTimeout(() => this.calAutocompleteList(true))
                 if (e.keyCode === 32) return e.preventDefault()
                 this.inputBox.value = ''
@@ -1498,8 +1506,9 @@ export default defineComponent({
               this.inputBox.focus()
               setTimeout(this.calAutocompleteList)
             }
-            else
+            else {
               setTimeout(() => this.calAutocompleteList(this.autocompleteInputs.length))
+            }
             this.inputBoxChanged = true
             break
         }
@@ -2237,7 +2246,7 @@ export default defineComponent({
         const rowPos = Array.from(row.parentNode.children).indexOf(row)
         this.$emit('cell-click', {rowPos, colPos})
         this.moveInputSquare(rowPos, colPos)
-        if (this.currentField && this.currentField.link && e.altKey)
+        if (this.currentField && this.currentField.link /* && e.altKey */)
           setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
         if (e.target.offsetWidth - e.offsetX > 15) return
         if (this.currentField.readonly) return
@@ -2323,7 +2332,9 @@ export default defineComponent({
       // Off the textarea when moving, write to value if changed
       if (this.inputBoxShow) this.inputBoxShow = 0
       if (this.inputBoxChanged) {
-        this.inputCellWrite(this.inputBox.value, this.currentColPos, top + this.currentRowPos)
+        const value = this.inputBox._value || this.inputBox.value
+        this.inputBox._value = ''
+        this.inputCellWrite(value, this.currentColPos, top + this.currentRowPos)
         this.inputBoxChanged = false
       }
 
@@ -2425,7 +2436,9 @@ export default defineComponent({
     },
     inputBoxComplete () {
       if (this.inputBoxChanged) {
-        this.inputCellWrite(this.inputBox.value)
+        const value = this.inputBox._value || this.inputBox.value
+        this.inputBox._value = ''
+        this.inputCellWrite(value)
         this.inputBoxChanged = false
       }
       this.inputBoxShow = 0
@@ -2913,10 +2926,12 @@ input:focus, input:active:focus, input.active:focus {
   text-overflow: ellipsis;
   /* animation: fadein 0.2s; */
 }
-.systable.alt tbody td.link:hover {
+.systable tbody td.link {
   color: blue;
-  text-decoration: underline;
   cursor: pointer !important;
+}
+.systable tbody td.link:hover {
+  text-decoration: underline;
 }
 .systable tbody td.error {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAXEgAAFxIBZ5/SUgAAAGZJREFUOBGlzjsOgDAMA9CwcQSO0PtP3K64Qyugv8S2ZMXTUw5DstmFk8qWAuhEbzSzbQ+oWIPKULAPpGAdxGJDiMGmUBRbQhFsC3kxF+TB3NAOC0ErLAzNMAoaYTT0xyTojclQxR5H5B1HhuS+WAAAAABJRU5ErkJggg==') !important;
