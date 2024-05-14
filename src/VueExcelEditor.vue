@@ -150,6 +150,9 @@
         <!-- Tool Tip -->
         <div v-show="tip" ref="tooltip" class="tool-tip">{{ tip }}</div>
 
+        <!-- Text Tip -->
+        <div v-show="textTip" ref="texttip" class="text-tip">{{ textTip }}</div>
+
         <!-- Editor Square -->
         <div v-show="focused" ref="inputSquare" class="input-square" @mousedown="inputSquareClick">
           <div style="position: relative; height: 100%; padding: 2px 2px 1px">
@@ -435,6 +438,7 @@ export default defineComponent({
       errmsg: {},
       rowerr: {},
       tip: '',
+      textTip: '',
 
       colHash: '',
       fields: [],
@@ -752,6 +756,7 @@ export default defineComponent({
       this.refreshPageSize()
     },
     calTable () {
+      this.textTip = ''
       // add unique key to each row if no key is provided
       let seed = String(new Date().getTime() % 1e8)
       this.modelValue.forEach((rec,i) => {
@@ -2252,7 +2257,30 @@ export default defineComponent({
         if (this.currentField && this.currentField.link /* && e.altKey */)
           setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
         if (this.currentField.listByClick) return this.calAutocompleteList(true)
-        if (e.target.offsetWidth - e.offsetX > 15) return
+        if (e.target.offsetWidth - e.offsetX > 25) return
+        if (e.target.offsetWidth < e.target.scrollWidth) {
+          // show textTip
+          this.textTip = this.currentCell.textContent
+          this.$refs.texttip.style.opacity = 0
+          const rect = e.target.getBoundingClientRect()
+          setTimeout(() => {
+            const r = this.$refs.texttip.getBoundingClientRect()
+            if (rect.bottom + r.height > window.innerHeight) {
+              // show at top
+              this.$refs.texttip.style.top = (rect.top - r.height) + 'px'
+            }
+            else {
+              this.$refs.texttip.style.top = rect.bottom + 'px'
+            }
+            if (rect.left + r.width > window.innerWidth)
+              this.$refs.texttip.style.left = (rect.right - r.width) + 'px'
+            else
+              this.$refs.texttip.style.left = rect.left + 'px'
+            this.$refs.texttip.style.opacity = 1
+          })
+          // this.$refs.texttip.style.top = rect.bottom + 'px'
+          // this.$refs.texttip.style.left = rect.left + 'px'
+        }
         if (this.currentField.readonly) return
         this.inputBox.value = this.currentCell.textContent
         if (e.target.classList.contains('select')) this.calAutocompleteList(true)
@@ -2262,19 +2290,26 @@ export default defineComponent({
     cellMouseMove (e) {
       let cursor = 'cell'
       if (this.inputBoxShow) cursor = 'default'
-      if (!e.target.classList.contains('readonly')
-        && (e.target.classList.contains('select') || e.target.classList.contains('datepick'))
-        && e.target.offsetWidth - e.offsetX < 15)
+      if (e.target.offsetWidth - e.offsetX < 25) {
+        if (!e.target.classList.contains('readonly') && (e.target.classList.contains('select') || e.target.classList.contains('datepick')))
+          cursor = 'pointer'
+        if (e.target.offsetWidth < e.target.scrollWidth)
+          cursor = 'pointer'
+      }
+      if (this.currentField && this.currentField.type === 'action')
         cursor = 'pointer'
       e.target.style.cursor = cursor
     },
     cellMouseOver (e) {
       const cell = e.target
+      const row = e.target.parentNode
+      const colPos = Array.from(row.children).indexOf(e.target) - 1
+      this.currentField = this.fields[colPos]
       if (!cell.classList.contains('error')) return
       if (this.tipTimeout) clearTimeout(this.tipTimeout)
       if ((this.tip = this.errmsg[cell.getAttribute('id')]) === '') return
       const rect = cell.getBoundingClientRect()
-      this.$refs.tooltip.style.top = (rect.top - 14) + 'px';
+      this.$refs.tooltip.style.top = (rect.top - 14) + 'px'
       this.$refs.tooltip.style.left = (rect.right + 8) + 'px'
       cell.addEventListener('mouseout', this.cellMouseOut)
     },
@@ -2284,7 +2319,7 @@ export default defineComponent({
       if (this.tipTimeout) clearTimeout(this.tipTimeout)
       if ((this.tip = this.rowerr[cell.getAttribute('id')]) === '') return
       const rect = cell.getBoundingClientRect()
-      this.$refs.tooltip.style.top = (rect.top - 14) + 'px';
+      this.$refs.tooltip.style.top = (rect.top - 14) + 'px'
       this.$refs.tooltip.style.left = (rect.right + 8) + 'px'
       cell.addEventListener('mouseout', this.cellMouseOut)
     },
@@ -2306,6 +2341,7 @@ export default defineComponent({
     /* *** InputBox *****************************************************************************************
      */
     moveInputSquare (rowPos, colPos) {
+      this.textTip = ''
       if (colPos < 0) return false
       const top = this.pageTop
       let row = this.recordBody.children[rowPos]
@@ -3280,6 +3316,20 @@ a:disabled {
   border-right: 8px solid red;
   left: -8px;
   top: 8px;
+}
+.text-tip {
+  display: inline-block;
+  position: fixed;
+  font-size: 0.88rem;
+  text-align: left;
+  color: gray;
+  background-color: lightyellow;
+  border: 1px solid lightgray;
+  padding: 0.5rem;
+  min-height: 1rem;
+  max-width: 300px;
+  word-wrap: break-word;
+  z-index: 50;
 }
 .norecord {
   z-index: 1;
