@@ -8,7 +8,7 @@ export default {
     field: {type: String, default: 'dummy'},
     label: {type: String, default: null},
     type: {type: String, default: 'string'},
-    initStyle: {type: Object, default () {return {}}},
+    initStyle: {type: Object, default: null},
     width: {type: String, default: '100px'},
     invisible: {type: Boolean, default: false},
     readonly: {type: Boolean, default: null},
@@ -21,6 +21,7 @@ export default {
     validate: {type: Function, default: null},
     change: {type: Function, default: null},
     link: {type: Function, default: null},
+    format: {type: String, default: 'text'},
     cellClick: {type: Function, default: null},
     autoFillWidth: {type: Boolean, default: false},
 
@@ -34,6 +35,8 @@ export default {
     sort: {type: Function, default: null},
     masking: {type: String, default: '•'},
     placeholder: {type: String, default: ''},
+    color: {type: [String, Function], default: null},
+    bgcolor: {type: [String, Function], default: null},
 
     toValue: {
       type: Function,
@@ -113,6 +116,8 @@ export default {
             return this.masking.repeat(val?.length || 0)
           case 'action':
             return this.placeholder || ''
+          case 'badge':
+            return `<span class='badge'>${val}</span>`
           default:
             return val
         }
@@ -126,7 +131,7 @@ export default {
   methods: {
     init () {
       const self = this
-      let style = this.initStyle
+      let style = this.initStyle || {}
       let validate = this.validate
       let allowKeys = this.allowKeys
       let lengthLimit = this.lengthLimit
@@ -209,6 +214,12 @@ export default {
         case 'action':
           this._listByClick = true
           break
+        case 'badge':
+          this._color = 'white'
+          this._bgcolor = 'blue'
+          this._format = 'html'
+          style.textAlign = 'center'
+          break
         default:
           throw new Error('VueExcelColumn: Not supported type:' + this.type)
       }
@@ -259,12 +270,15 @@ export default {
         options: this.options,
         summary: this.summary,
         masking: this.masking,
+        format: this._format || this.format,
         toValue: this.toValue,
         toText: this.toText,
         register: this.register,
         placeholder: this.placeholder,
         cellClick: this.cellClick,
-        listByClick: this.listByClick || this._listByClick
+        listByClick: this.listByClick || this._listByClick,
+        color: this.color || this._color,
+        bgcolor: this.bgcolor || this._bgcolor
       })
     }
   }

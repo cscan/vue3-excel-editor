@@ -118,12 +118,15 @@
                     link: item.link,
                     select: item.options,
                     datepick: item.type == 'date',
-                    'sticky-column': item.sticky
+                    stickyColumn: item.sticky
                   }"
                   :key="p"
-                  :style="Object.assign(cellStyle(record, item), renderColumnCellStyle(item))"
+                  :style="Object.assign(cellStyle(record, item), renderColumnCellStyle(item, record))"
                   @mouseover="cellMouseOver"
-                  @mousemove="cellMouseMove">{{ item.toText(record[item.name]) }}</td>
+                  @mousemove="cellMouseMove">
+                  <template v-if="item.format=='html'"><span v-html="item.toText(record[item.name])" /></template>
+                  <template v-else>{{ item.toText(record[item.name]) }}</template>
+                </td>
               <td v-if="vScroller.buttonHeight < vScroller.height" class="last-col"></td>
             </tr>
           </tbody>
@@ -904,10 +907,14 @@ export default defineComponent({
       const instance = getCurrentInstance()
       instance?.proxy?.$forceUpdate()
     },
-    renderColumnCellStyle (field) {
+    renderColumnCellStyle (field, record) {
       let result = field.initStyle
       if (field.readonly) result = Object.assign(result, this.readonlyStyle)
       if (field.left) result = Object.assign(result, {left: field.left})
+      if (record && field.bgcolor)
+        result = Object.assign(result, {'--bgcolor': typeof field.bgcolor === 'function' ? field.bgcolor(record) : field.bgcolor })
+      if (record && field.color)
+        result = Object.assign(result, {'--color': typeof field.color === 'function' ? field.color(record) : field.color })
       return result
     },
     localeDate (d) {
@@ -2299,7 +2306,7 @@ export default defineComponent({
       const row = e.target.parentNode
       const colPos = Array.from(row.children).indexOf(e.target) - 1
       const currentField = this.fields[colPos]
-      if (currentField.type === 'action')
+      if (currentField?.type === 'action')
         cursor = 'pointer'
       e.target.style.cursor = cursor
     },
@@ -2970,8 +2977,16 @@ input:focus, input:active:focus, input.active:focus {
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
+  color: var(--color);
   /* animation: fadein 0.2s; */
 }
+.systable tbody td :deep(.badge) {
+  padding: 0px 10px;
+  border-radius: 10px;
+  background-color: var(--bgcolor);
+  font-weight: 600
+}
+
 .systable tbody td.link {
   color: blue;
   cursor: pointer !important;
