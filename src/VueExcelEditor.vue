@@ -2984,7 +2984,7 @@ input:focus, input:active:focus, input.active:focus {
   padding: 0px 10px;
   border-radius: 10px;
   background-color: var(--bgcolor);
-  font-weight: 600
+  font-weight: 400;
 }
 
 .systable tbody td.link {
