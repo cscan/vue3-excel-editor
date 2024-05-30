@@ -421,7 +421,7 @@ export default defineComponent({
       pageTop: 0,                   // Current page top pos of [table] array
 
       selected: {},                 // selected storage in hash, key is the pos of [table] array
-      selectedCount: 0,             // selected row count
+      _selectedCount: 0,            // selected row count
       prevSelect: -1,               // previous select pos of [table] array
       processing: false,            // current general-purpose processing status
 
@@ -482,6 +482,15 @@ export default defineComponent({
     return dataset
   },
   computed: {
+    selectedCount: {
+      get () {
+        return this._selectedCount
+      },
+      set (value) {
+        this._selectedCount = value
+        this.$emit('update:selectedCount', value)
+      }
+    },
     token () {
       const id = Array.from(document.querySelectorAll('.vue-excel-editor')).indexOf(this.$el)
       return `vue-excel-editor-${id}`
