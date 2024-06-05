@@ -115,7 +115,7 @@
                   :class="{
                     readonly: item.readonly,
                     error: errmsg[`id-${record.$id}-${item.name}`],
-                    link: item.link,
+                    link: item.link && item.toText(record[item.name]),
                     select: item.options,
                     datepick: item.type == 'date',
                     stickyColumn: item.sticky
@@ -2270,7 +2270,7 @@ export default defineComponent({
         if (typeof this.currentField.cellClick === 'function')
           this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
         this.moveInputSquare(rowPos, colPos)
-        if (this.currentField && this.currentField.link /* && e.altKey */)
+        if (this.currentField && this.currentField.link /* && e.altKey */ && this.currentCell.textContent)
           setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
         if (this.currentField.listByClick) return this.calAutocompleteList(true)
         if (e.target.offsetWidth - e.offsetX > 25) return
