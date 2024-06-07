@@ -2263,6 +2263,7 @@ export default defineComponent({
         const rowPos = Array.from(row.parentNode.children).indexOf(row)
         this.currentField = this.fields[colPos]
         this.currentCell = row.children[colPos + 1]
+        this.currentRecord = this.table[this.pageTop + rowPos]
         this.$emit('cell-click', {rowPos, colPos})
         if (typeof this.currentField.cellClick === 'function')
           this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
