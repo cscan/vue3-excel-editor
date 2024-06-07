@@ -919,11 +919,9 @@ export default defineComponent({
     renderColumnCellStyle (field, record) {
       let result = field.initStyle
       if (field.readonly) result = Object.assign(result, this.readonlyStyle)
-      if (field.left) result = Object.assign(result, {left: field.left})
-      if (record && field.bgcolor)
-        result = Object.assign(result, {'--bgcolor': typeof field.bgcolor === 'function' ? field.bgcolor(record) : field.bgcolor })
+      if (field.left) result.left = field.left
       if (record && field.color)
-        result = Object.assign(result, {'--color': typeof field.color === 'function' ? field.color(record) : field.color })
+        result.color = (typeof field.color === 'function' ? field.color(record) : field.color)
       return result
     },
     localeDate (d) {
@@ -2260,18 +2258,21 @@ export default defineComponent({
     mouseDown (e) {
       if (e.target.parentNode.parentNode.tagName === 'TBODY' && !e.target.classList.contains('first-col')) {
         e.preventDefault()
-        setTimeout(() => this.inputBox.focus())
-        this.focused = true
         const row = e.target.parentNode
         const colPos = Array.from(row.children).indexOf(e.target) - 1
         const rowPos = Array.from(row.parentNode.children).indexOf(row)
         this.currentField = this.fields[colPos]
+        this.currentCell = row.children[colPos + 1]
         this.$emit('cell-click', {rowPos, colPos})
         if (typeof this.currentField.cellClick === 'function')
           this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
-        this.moveInputSquare(rowPos, colPos)
         if (this.currentField && this.currentField.link /* && e.altKey */ && this.currentCell.textContent)
-          setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
+          return setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
+
+        setTimeout(() => this.inputBox.focus())
+        this.focused = true
+        this.moveInputSquare(rowPos, colPos)
+
         if (this.currentField.listByClick) return this.calAutocompleteList(true)
         if (e.target.offsetWidth - e.offsetX > 25) return
         if (e.target.offsetWidth < e.target.scrollWidth) {
@@ -2986,13 +2987,11 @@ input:focus, input:active:focus, input.active:focus {
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
-  color: var(--color);
   /* animation: fadein 0.2s; */
 }
 .systable tbody td :deep(.badge) {
   padding: 0px 10px;
   border-radius: 10px;
-  background-color: var(--bgcolor);
   font-weight: 400;
 }
 

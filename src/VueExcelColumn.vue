@@ -117,7 +117,13 @@ export default {
           case 'action':
             return this.placeholder || ''
           case 'badge':
-            return `<span class='badge'>${val}</span>`
+            if (this.bgcolor) {
+              let bgcolor = this.bgcolor
+              if (typeof bgcolor == 'function') bgcolor = bgcolor(val)
+              return `<span class='badge' style='background-color:${bgcolor}'>${val}</span>`
+            }
+            else
+              return `<span class='badge'>${val}</span>`
           default:
             return val
         }
