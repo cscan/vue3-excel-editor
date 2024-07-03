@@ -6,10 +6,13 @@
     ondragenter="event.preventDefault(); event.dataTransfer.dropEffect = 'none'"
     ondragover="event.preventDefault(); event.dataTransfer.dropEffect = 'none'"
     class="cell column-filter"
-    :style="filterRowTop"
+    :class="class"
+    style="filterRowTop"
+    :style="style"
     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
     tabindex="-1"
     v-on="listeners"
+    :colspan="colspan"
     @focus="onFocus"
     @blur="onBlur"
     @keydown.left.exact="keyWest"
@@ -24,7 +27,10 @@
 export default {
   props: {
     modelValue: {type: String, default: ''},
-    interactive: {type: Boolean, default: false}
+    interactive: {type: Boolean, default: false},
+    colspan: {type: [String, Number], default: 1},
+    class: {type: [String, Object], default: null},
+    style: {type: [String, Object], default: null}
   },
   data () {
     return {
