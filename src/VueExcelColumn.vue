@@ -8,7 +8,7 @@ export default {
     field: {type: String, default: 'dummy'},
     label: {type: String, default: null},
     type: {type: String, default: 'string'},
-    initStyle: {type: Object, default: null},
+    initStyle: {type: [Object, Function], default: null},
     width: {type: String, default: '100px'},
     invisible: {type: Boolean, default: false},
     readonly: {type: Boolean, default: null},
@@ -21,6 +21,7 @@ export default {
     validate: {type: Function, default: null},
     change: {type: Function, default: null},
     link: {type: Function, default: null},
+    isLink: {type: Function, default: null},
     format: {type: String, default: 'text'},
     cellClick: {type: Function, default: null},
     autoFillWidth: {type: Boolean, default: false},
@@ -115,7 +116,7 @@ export default {
           case 'password':
             return this.masking.repeat(val?.length || 0)
           case 'action':
-            return this.placeholder || ''
+            return ''
           case 'badge':
             if (this.bgcolor) {
               let bgcolor = this.bgcolor
@@ -234,7 +235,7 @@ export default {
       if (this.textAlign) style.textAlign = this.textAlign
       // if (this.readonly && this.$parent.readonlyStyle) style = Object.assign(style, this.$parent.readonlyStyle)
 
-      this._autocomplete = self.autocomplete
+      this._autocomplete = self.autocomplete || self.type === 'action'
       this._readonly = self.readonly
 
       this.$parent.registerColumn({
@@ -247,6 +248,7 @@ export default {
         validate: validate,
         change: this.change,
         link: this.link,
+        isLink: this.isLink || (this.link ? () => true : null),
         sort: this.sort,
 
         keyField: this.keyField,
@@ -267,6 +269,8 @@ export default {
         initStyle: style,
         invisible: this.invisible,
         get readonly () {
+          if (self.link) return true
+          if (self.type === 'action') return false
           return self._readonly === null ? self.$parent.readonly : self._readonly
         },
         set readonly (val) {
@@ -278,7 +282,11 @@ export default {
         masking: this.masking,
         format: this._format || this.format,
         toValue: this.toValue,
-        toText: this.toText,
+        toText: (...arg) => {
+          const result = this.toText(...arg)
+          if (this.placeholder && result === '') return this.placeholder
+          return result
+        },
         register: this.register,
         placeholder: this.placeholder,
         cellClick: this.cellClick,

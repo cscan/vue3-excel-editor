@@ -115,7 +115,7 @@
                   :class="{
                     readonly: item.readonly,
                     error: errmsg[`id-${record.$id}-${item.name}`],
-                    link: item.link && item.toText(record[item.name]),
+                    link: item.link && item.isLink && item.isLink(record),
                     select: item.options,
                     datepick: item.type == 'date',
                     stickyColumn: item.sticky
@@ -918,6 +918,7 @@ export default defineComponent({
     },
     renderColumnCellStyle (field, record) {
       let result = field.initStyle
+      if (typeof result === 'function') result = result(record, field)
       if (field.readonly) result = Object.assign(result, this.readonlyStyle)
       if (field.left) result.left = field.left
       if (record && field.color)

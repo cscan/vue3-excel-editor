@@ -132,8 +132,10 @@ In your template
 | summary        | Optional  | String            | Summary: 'sum', 'avg', 'max', 'min'. Default is null |
 | sort           | Optional  | Function          | The custom function for sorting the column |
 | link           | Optional  | Function          | The function to react to the alt-click on cell text |
+| is-link        | Optional  | Function          | The function to identify it is a link |
 | to-text        | Optional  | Function          | The function to convert from object value to edit-text |
 | to-value       | Optional  | Function          | The function to convert from edit-text to object value |
+| placeholder    | Optional  | String            | The custom text if the field is null |
 
 @ - Function can return a promise
 
@@ -153,6 +155,7 @@ In your template
 | datetick        | unix timestamp      | yyyy-mm-dd          | left    | valid date         | none         | Y |
 | datetimetick    | unix timestamp      | yyyy-mm-dd hh:mn    | left    | valid datetime     | none         | Y |
 | datetimesectick | unix timestamp      | yyyy-mm-dd hh:mn:ss | left    | valid datetimesec  | none         | Y |
+| action          | string              | null                | center  | none               | none         | Y |
 
 ## Hot Key List
 
@@ -230,18 +233,20 @@ In your template
 
 ### Variable Component: vue-excel-editor
 
-| Name          | Type    | Description |
-| :---          | :---    | :---        |
-| processing    | Boolean | Component is busy or not |
-| pageTop       | Number  | The top row number of the current page |
-| pageSize      | Number  | The number of rows of each page |
-| fields        | AOO     | It contains the column spec create when mount |
-| filterColumn  | Object  | Contains the current filters, developer can access the filter string via this |
-| table         | AOO     | It contains the filtered records |
-| selected      | Object  | Contains all the selected rows, the key is row number and the value is internal $id |
-| selectedCount | Number  | Number of rows are selected |
-| errmsg        | Object  | Contains all the validation error messages, the key is internal $id plus field name |
-| redo          | AOA     | The buffer of undo, it will be removed after undo or table changed |
+| Name           | Type    | Description |
+| :---           | :---    | :---        |
+| processing     | Boolean | Component is busy or not |
+| pageTop        | Number  | The top row number of the current page |
+| pageSize       | Number  | The number of rows of each page |
+| fields         | AOO     | It contains the column spec create when mount |
+| filterColumn   | Object  | Contains the current filters, developer can access the filter string via this |
+| table          | AOO     | It contains the filtered records |
+| selected       | Object  | Contains all the selected rows, the key is row number and the value is internal $id |
+| selectedCount@ | Number  | Number of rows are selected |
+| errmsg         | Object  | Contains all the validation error messages, the key is internal $id plus field name |
+| redo           | AOA     | The buffer of undo, it will be removed after undo or table changed |
+
+@ - allow v-model binding
 
 AOA = Array of Array, i.e. [[...], [...]]  
 AOO = Array of Object, i.e. [{...}, {...}]
@@ -451,22 +456,31 @@ methods: {
 You may also want to watch the selected records count for displaying the action buttons. For example:
 
 ```html
+<vue-excel-editor v-model:selected-count="count">
+...
+</vue-excel-editor>
+
 <button v-show="showDeleteAction"> Delete </button>
 <button v-show="showSendEmailInvitationAction"> Invite </button>
 <button v-show="showSendBirthdayGreetingAction"> Greeting </button>
 ```
 
 ```js
+data () {
+    return {
+        count: 0
+    }
+}
 computed: {
     showDeleteAction () {
-        return this.$refs.grid.selectedCount > 0  // Show if any records selected
+        return this.count > 0  // Show if any records selected
     },
     showSendEmailInvitationAction () {
-        return this.$refs.grid.selectedCount === 1  // Show if single record is selected
+        return this.count === 1  // Show if single record is selected
     },
     showSendBirthdayGreetingAction () {
         // Show only if any selected people birthday matched today
-        if (this.$refs.grid.selectedCount > 0) {
+        if (this.count > 0) {
             return this.$refs.grid.getSelectedRecords().filter(item => item.birth === today).length > 0
         else
             return false
@@ -732,7 +746,7 @@ Use this with care. The summary calculation eats resource, so it only calculates
 This is a nice feature in enterprise applications. Actually, I was learning from SAP UI. When the user holds the function key (Alt-key here) and move the mouse over the cell content, the text will show as a link. If user clicks on the link, your custom function will be triggered. The following example shows how to route to the user profile page by clicking on the name column cell.
 
 ```html
-<vue-excel-column field="name" label="Name" type="string" width="150px" :link="routeToUserFunc" />
+<vue-excel-column field="name" label="Name" type="string" width="150px" :link="routeToUserFunc" :is-link="showLinkOrString" />
 ```
 
 ```js
@@ -740,9 +754,14 @@ methods: {
     // Hold Alt Key and click on any name, program will route to the page "User Profile"
     routeToUserFunc (content, record) {
         this.$router.push(`/user/${record.user}`)
+    },
+    showLinkOrString(record) {
+        return record.gender === 'M' // Only gender M show the link
     }
 }
 ```
+
+All links will be set as readonly
 
 ### Text/Value conversion
 
@@ -764,6 +783,54 @@ methods: {
     },
 }
 ```
+
+### Badge
+
+Sometimes we want to display the text in badge style.
+
+```html
+<vue-excel-column field="user" label="User ID" type="badge" width="80px" :bg-color="badgeColor" />
+```
+
+```js
+methods: {
+    badgeColor (rec) {
+        return 'blue'
+    }
+}
+```
+
+All badge will be set as readonly
+
+### Action
+
+Sometimes we want to display the list of actions for record processing, such as Edit/Remove.
+
+```html
+<vue-excel-column field="do" label="Action" type="action" :options="['Edit', 'Remove']" width="100px" :change="doAction" placeholder="Action" />
+```
+
+```js
+methods: {
+    doAction (rec) {
+        if (rec.do === 'Edit')
+            // do Edit process
+        else if (rec.do === 'Remove')
+            // do Remove process
+    }
+}
+```
+
+All action will be set as non-readonly
+
+### Password
+
+For password editing:
+
+```html
+<vue-excel-column type="password" field="pwd" label="Password" width="90px" />
+```
+
 
 ### Localization
 
