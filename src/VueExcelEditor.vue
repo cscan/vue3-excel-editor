@@ -118,7 +118,8 @@
                     link: item.link && item.isLink && item.isLink(record),
                     select: item.options,
                     datepick: item.type == 'date',
-                    stickyColumn: item.sticky
+                    stickyColumn: item.sticky,
+                    hideDuplicate: item.hideDuplicate && rowPos > 0 && isSameSinceLeft(p, record, pagingTable[rowPos-1])
                   }"
                   :key="p"
                   :style="Object.assign(cellStyle(record, item), renderColumnCellStyle(item, record))"
@@ -630,6 +631,15 @@ export default defineComponent({
     }
   },
   methods: {
+    isSameSinceLeft(p, rec1, rec2) {
+      for(let i=0; i<=p; i++) {
+        if (!this.fields[i].invisible && this.fields[i].hideDuplicate) {
+          const name = this.fields[i].name
+          if (rec1[name] !== rec2[name]) return false
+        }
+      }
+      return true
+    },
     componentTabInto (e) {
       if (e.keyCode === 9) {
         if (!this.moveInputSquare(this.currentRowPos, this.currentColPos))
@@ -2387,6 +2397,7 @@ export default defineComponent({
       this.labelTr.children[this.currentColPos + 1].classList.remove('focus')
       if (this.currentRowPos >= 0 && this.currentRowPos < this.pagingTable.length)
         this.recordBody.children[this.currentRowPos].children[0].classList.remove('focus')
+      this.lastCell?.classList.remove('focus')
 
       // Off the textarea when moving, write to value if changed
       if (this.inputBoxShow) this.inputBoxShow = 0
@@ -2426,6 +2437,8 @@ export default defineComponent({
       this.currentRecord = this.table[top + rowPos]
 
       this.$emit('cell-focus', {rowPos, colPos, cell, record: this.currentRecord})
+      this.currentCell.classList.add('focus')
+      this.lastCell = this.currentCell
 
       // Off all editors
       if (this.showDatePicker) this.showDatePicker = false
@@ -2492,6 +2505,7 @@ export default defineComponent({
         this.recordBody.children[this.currentRowPos].children[0].classList.remove('focus')
         this.labelTr.children[this.currentColPos + 1].classList.remove('focus')
       }
+      this.lastCell?.classList.remove('focus')
     },
     inputBoxComplete () {
       if (this.inputBoxChanged) {
@@ -3010,11 +3024,11 @@ input:focus, input:active:focus, input.active:focus {
   background-size: 8px 8px !important;
   background-position: right 0px top 0px !important;
 }
-.systable tbody tr:not(:last-child) td {
-  border-bottom: 1px solid lightgray;
+.systable tbody tr:not(:first-child) td {
+  border-top: 1px solid lightgray;
 }
-.systable tbody tr:last-child td {
-  border-bottom: 1px solid transparent;
+.systable tbody tr:first-child td {
+  border-top: 1px solid transparent;
 }
 .systable td:not(:last-child) {
   border-right: 1px solid lightgray;
@@ -3362,5 +3376,10 @@ a:disabled {
   position: absolute;
   left: 50%;
   transform: translate(-50%, 0%);
+}
+td.hideDuplicate:not(.focus) {
+  border-top: 1px solid transparent !important;
+  color: transparent;
+  text-shadow: none;
 }
 </style>

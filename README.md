@@ -761,7 +761,7 @@ methods: {
 }
 ```
 
-All links will be set as readonly
+All links will be set as readonly by default.
 
 ### Text/Value conversion
 
@@ -800,7 +800,7 @@ methods: {
 }
 ```
 
-All badge will be set as readonly
+All badge will be set as readonly by default.
 
 ### Action
 
@@ -821,7 +821,8 @@ methods: {
 }
 ```
 
-All action will be set as non-readonly
+All action will be set as non-readonly to make it selectable. The component will assign a to-text function to return empty string.
+If you want to show a static text in cell, you could use placeholder prop.
 
 ### Password
 
@@ -831,6 +832,25 @@ For password editing:
 <vue-excel-column type="password" field="pwd" label="Password" width="90px" />
 ```
 
+### Hide Duplication
+
+If a column set to hide-duplicaiton, the component will compare the cell content with the above content and hide it by setting
+to transparent color and remove the border-top. It also affects the next column which also set to hide-duplication. Here is an example:
+
+```html
+  <vue-excel-editor v-model="jsondata" filter-row>
+    <vue-excel-column type="map"      field="gender" width="80px"  label="Gender" :options="{M: 'Male', F: 'Female'}" hide-duplicate />
+    <vue-excel-column type="number"   field="age"    width="60px"  label="Age" summary="avg" hide-duplicate />
+    <vue-excel-column type="badge"    field="user"   width="75px"  label="User" :bgcolor="badgeColor" />
+    <vue-excel-column type="string"   field="name"   width="150px" label="Name" :link="linkClick" :is-link="isLink" />
+    <vue-excel-column type="string"   field="phone"  width="160px" label="Contact" />
+    <vue-excel-column type="password" field="pwd"    width="90px"  label="Password" />
+    <vue-excel-column type="date"     field="birth"  width="115px" label="Date Of Birth" />
+    <vue-excel-column type="action"   field="action" width="75px"  label="#" :options="['Edit', 'Remove']" :change="doAction" placeholder="Action" />
+  </vue-excel-editor>
+```
+
+![Hide Duplication](https://i.imgur.com/HCFyEEp.png "Hide Duplication")
 
 ### Localization
 
