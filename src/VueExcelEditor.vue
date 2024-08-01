@@ -125,8 +125,8 @@
                   :style="Object.assign(cellStyle(record, item), renderColumnCellStyle(item, record))"
                   @mouseover="cellMouseOver"
                   @mousemove="cellMouseMove">
-                  <template v-if="item.format=='html'"><span v-html="item.toText(record[item.name])" /></template>
-                  <template v-else>{{ item.toText(record[item.name]) }}</template>
+                  <template v-if="item.format=='html'"><span v-html="item.toText(record[item.name], record, item)" /></template>
+                  <template v-else>{{ item.toText(record[item.name], record, item) }}</template>
                 </td>
               <td v-if="vScroller.buttonHeight < vScroller.height" class="last-col"></td>
             </tr>
@@ -1703,26 +1703,26 @@ export default defineComponent({
       const field = this.fields[colPos]
       const name = field.name
       setTimeout(() => {
-        let sorting = field.sort
+        let sorting = field.sorting
         if (sorting === null) {
           if (field.type === 'number')
             sorting = (a, b) => {
-              if (Number(a[name]) > Number(b[name])) return 1
-              if (Number(a[name]) < Number(b[name])) return -1
+              if (Number(a) > Number(b)) return 1
+              if (Number(a) < Number(b)) return -1
               return 0
             }
           else
-              sorting = (a, b) => {
-                return String(a[name]).localeCompare(String(b[name]))
-              }
+            sorting = (a, b) => {
+              return String(a).localeCompare(String(b))
+            }
         }
         this.modelValue.sort((a, b) => {
-          return sorting(a, b) * -n
+          if (field.sort) return field.sort(a, b) * -n
+          else return sorting(a[name], b[name]) * -n
         })
         this.sortPos = colPos
         this.sortDir = n
         this.refresh()
-        // this.$forceUpdate()
         this.processing = false
       }, 0)
     },
@@ -2492,9 +2492,9 @@ export default defineComponent({
       if (typeof colPos !== 'undefined') field = this.fields[colPos]
       if (typeof recPos === 'undefined') recPos = this.pageTop + this.currentRowPos
       if (typeof this.selected[recPos] !== 'undefined')
-        this.updateSelectedRows(field, field.toValue(setText))
+        this.updateSelectedRows(field, setText)
       else
-        this.updateCell(recPos, field, field.toValue(setText))
+        this.updateCell(recPos, field, field.toValue(setText, this.table[recPos], field))
     },
     inputBoxBlur () {
       if (!this.$refs.dpContainer) return
@@ -2668,10 +2668,13 @@ export default defineComponent({
         }, 50)
       })
     },
-    updateSelectedRows (field, content) {
+    updateSelectedRows (field, setText) {
       this.processing = true
       setTimeout(() => {
-        Object.keys(this.selected).forEach(recPos => this.updateCell(parseInt(recPos), field, content))
+        Object.keys(this.selected).forEach(recPos => {
+          const pos = parseInt(recPos)
+          this.updateCell(pos, field, field.toValue(setText, this.table[pos], field))
+        })
         this.processing = false
       }, 0)
     },
