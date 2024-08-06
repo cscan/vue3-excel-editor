@@ -117,16 +117,17 @@
                     error: errmsg[`id-${record.$id}-${item.name}`],
                     link: item.link && item.isLink && item.isLink(record),
                     select: item.options,
+                    grouping: item.grouping,
                     datepick: item.type == 'date',
                     stickyColumn: item.sticky,
-                    hideDuplicate: item.hideDuplicate && rowPos > 0 && isSameSinceLeft(p, record, pagingTable[rowPos-1])
+                    hideDuplicate: item.hideDuplicate && rowPos > 0 && isSameSinceLeft(p, record, pagingTable[rowPos-1]),
                   }"
                   :key="p"
                   :style="Object.assign(cellStyle(record, item), renderColumnCellStyle(item, record))"
                   @mouseover="cellMouseOver"
                   @mousemove="cellMouseMove">
-                  <template v-if="item.format=='html'"><span v-html="item.toText(record[item.name], record, item)" /></template>
-                  <template v-else>{{ item.toText(record[item.name], record, item) }}</template>
+                  <template v-if="item.format=='html'"><span v-html="item.toText(record[item.name], record, item, p)" /></template>
+                  <template v-else>{{ item.toText(record[item.name], record, item, p) }}</template>
                 </td>
               <td v-if="vScroller.buttonHeight < vScroller.height" class="last-col"></td>
             </tr>
@@ -478,7 +479,9 @@ export default defineComponent({
       summaryRow: false,
       summary: {},
       showFilteredOnly: true,
-      showSelectedOnly: false
+      showSelectedOnly: false,
+
+      ungroup: {}
     }
     return dataset
   },
@@ -836,6 +839,7 @@ export default defineComponent({
           }
         })
         this.filteredValue = this.modelValue.filter(record => this.recordFilter(record))
+        this.filteredValue = this.filteredValue.filter((record, i) => this.filterGrouping(record, i, this.modelValue))
         if (filterColumnList.length === 0)
           this.table = this.filteredValue
         else {
@@ -907,6 +911,22 @@ export default defineComponent({
         this.reviseSelectedAfterTableChange()
       }
       this.calSummary()
+    },
+    filterGrouping (rec, i, table) {
+      if (i === 0) return true
+      const prec = table[i-1]
+      let result = true
+      this.fields.forEach(field => {
+        const name = field.name
+        if (field.grouping && rec[name] === prec[name]) {
+          if (field.grouping === 'collapse' && this.ungroup[field.name + rec[name]] !== true)
+            result = false
+          else
+          if (field.grouping === 'expand' && this.ungroup[field.name + rec[name]])
+            result = false
+        }
+      })
+      return result
     },
     calStickyLeft () {
       let left = 0, n = 0
@@ -2280,7 +2300,11 @@ export default defineComponent({
           this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
         if (this.currentField && this.currentField.link /* && e.altKey */ && this.currentCell.textContent)
           return setTimeout(() => this.currentField.link(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this))
-
+        if (this.currentField.grouping) {
+          this.ungroup[this.currentField.name + this.currentCell.textContent] = !this.ungroup[this.currentField.name + this.currentCell.textContent]
+          this.refresh()
+          return
+        }
         setTimeout(() => this.inputBox.focus())
         this.focused = true
         this.moveInputSquare(rowPos, colPos)
@@ -2328,7 +2352,7 @@ export default defineComponent({
       const row = e.target.parentNode
       const colPos = Array.from(row.children).indexOf(e.target) - 1
       const currentField = this.fields[colPos]
-      if (currentField?.type === 'action')
+      if (currentField?.type === 'action' || currentField?.grouping)
         cursor = 'pointer'
       e.target.style.cursor = cursor
     },
@@ -3062,6 +3086,12 @@ input:focus, input:active:focus, input.active:focus {
 }
 .systable td.first-col.focus {
   border-right: 1px solid rgb(61, 85, 61) !important;
+}
+.systable tbody td.grouping {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAlmVYSWZNTQAqAAAACAAFARIAAwAAAAEAAQAAARoABQAAAAEAAABKARsABQAAAAEAAABSATEAAgAAABEAAABah2kABAAAAAEAAABsAAAAAAAAAGAAAAABAAAAYAAAAAF3d3cuaW5rc2NhcGUub3JnAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAADaADAAQAAAABAAAADQAAAAC2lhxrAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADBGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+CiAgICAgICAgIDxleGlmOlBpeGVsWURpbWVuc2lvbj44MjwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOlBpeGVsWERpbWVuc2lvbj44MjwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOkNvbG9yU3BhY2U+MTwvZXhpZjpDb2xvclNwYWNlPgogICAgICAgICA8dGlmZjpYUmVzb2x1dGlvbj45NjwvdGlmZjpYUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6WVJlc29sdXRpb24+OTY8L3RpZmY6WVJlc29sdXRpb24+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+d3d3Lmlua3NjYXBlLm9yZzwveG1wOkNyZWF0b3JUb29sPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4K/79DmAAAARFJREFUKBWFks9KQkEUh70h9EdwY6abFhcUxK1P4EqsoKezB+gNjDDa1FO40YVoG7V1URDo940zUkT0g++ec+ecM85vrllhpyLhK+Z94gVU4RVG8AAq9B2khJjDGG7hDNYx+u66dTd2MMiFTxjsXn89b1j5APv2cicLKoNjaMfou7JuX5AePIpKDRXyBZy6iNK6HvueT9PPoI7gBBpwGOOG+AYe7wkuHdL0EtQ5PEIJyjCEd+jBBFZQc8ifrIN6gQ404Q6uYQoOqhrYX/jL05ya3tR3T9oJ8lYGMbdBXy3wFtOAdfv2ysn++07W7Qu76Msv7cI9VMHbDKaJXdDHFcygmPFQadBcj57bW13DCH7897YprztHz5xxRwAAAABJRU5ErkJggg==');
+  background-repeat: no-repeat;
+  background-size: 8px 8px;
+  background-position: right 5px top 8px;
 }
 .systable tbody td.select:not(.readonly) {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAASUExURQAAANra2tfX19ra2tnZ2dnZ2c8lDs8AAAAFdFJOUwAwQL/PKlwehgAAAAlwSFlzAAAXEQAAFxEByibzPwAAAEdJREFUKFNdyskBACAIA8F49d+yiBEh+9rHYC5poPGiDmUDUGZI2EHCHBV2UWFEiT2UWKBgHwVLiCwjsoKcVeRMkDFFxoiADdH4AyvGhvOPAAAAAElFTkSuQmCC');

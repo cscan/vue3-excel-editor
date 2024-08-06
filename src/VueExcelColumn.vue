@@ -26,6 +26,7 @@ export default {
     cellClick: {type: Function, default: null},
     autoFillWidth: {type: Boolean, default: false},
     hideDuplicate: {type: Boolean, default: false},
+    grouping: {type: String, default: null},
 
     allowKeys: {type: [Array, Function], default () {return null}},
     mandatory: {type: String, default: ''},
@@ -294,7 +295,8 @@ export default {
         listByClick: this.listByClick || this._listByClick,
         color: this.color || this._color,
         bgcolor: this.bgcolor || this._bgcolor,
-        hideDuplicate: this.hideDuplicate
+        hideDuplicate: this.hideDuplicate || this.grouping,
+        grouping: this.grouping
       })
     }
   }

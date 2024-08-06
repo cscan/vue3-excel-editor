@@ -852,6 +852,43 @@ to transparent color and remove the border-top. It also affects the next column 
 
 ![Hide Duplication](https://i.imgur.com/HCFyEEp.png "Hide Duplication")
 
+All field set to hide duplication will be set as readonly by default.
+
+### Grouping
+
+Grouping is a little bit tricky. Sometimes we want to show the first row of a set of record and hide the rest of the row
+based on the cell value. For example, we want to group the gender by M and F and the first record are the header that holds the statistics
+of each group. If this is the case, you could use grouping attribute. For example:
+
+```html
+  <vue-excel-editor ref="editor" v-if="!hide" v-model="jsondata" filter-row v-model:selected-count="count">
+    <vue-excel-column type="string"   field="region" width="80px"  label="Group1" grouping="collapse" />
+    <vue-excel-column type="string"   field="area"   width="80px"  label="Group2" grouping="collapse" />
+    <vue-excel-column type="map"      field="gender" width="80px"  label="Gender" :options="{M: 'Male', F: 'Female'}" :change="genderChange" />
+    <vue-excel-column type="number"   field="age"    width="60px"  label="Age" :validate="validateAge" summary="avg" />
+    <vue-excel-column type="badge"    field="user"   width="75px"  label="User" :bgcolor="badgeColor" />
+    <vue-excel-column type="string"   field="name"   width="150px" label="Name" :link="linkClick" :isLink="isLink" />
+    <vue-excel-column type="string"   field="phone"  width="160px" label="Contact" :to-text="toTextPasswd"/>
+    <vue-excel-column type="password" field="pwd"    width="90px"  label="Password" />
+    <vue-excel-column type="date"     field="birth"  width="115px" label="Date Of Birth" />
+    <vue-excel-column type="action"   field="action" width="75px"  label="#" :options="['Edit', 'Remove']" :change="doAction" placeholder="Action" />
+  </vue-excel-editor>
+```
+
+```js
+  jsondata = [
+    {region: 'US', area: 'AZ', user: "hc", name: "Harry Cole", phone: "1-415-2345678", gender: "M", age: 25, birth: "1997-07-01"},
+    {region: 'US', area: 'AZ', user: "sm", name: "Simon Minolta", phone: "1-123-7675682", gender: "M", age: 25, birth: "1999-11-12"},
+    {region: 'US', area: 'CL', user: "ra", name: "Rachael Amy", phone: "1-456-9981212", gender: "F", age: 19, birth: "2000-06-11"},
+    {region: 'US', area: 'CL', user: "ag", name: "Mary George", phone: "1-556-1245684", gender: "F", age: 19, birth: "2002-08-01"},
+    {region: 'CN', area: 'GZ', user: "kl", name: "Kenny Linus", phone: "1-891-2345685", gender: "F", age: 29, birth: "1990-09-01"}
+  ])
+```
+
+All field set to be grouping will be set as readonly and hide duplication by default.
+
+![Grouping](https://i.imgur.com/g5XnsbF.png "Grouping")
+
 ### Localization
 
 The developer may override the default values through localized-label prop.
