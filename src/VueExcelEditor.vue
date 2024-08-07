@@ -561,7 +561,7 @@ export default defineComponent({
       handler () {
         this.lazy(() => {
           const setting = this.getSetting()
-          if (this.remember) localStorage[window.location.pathname + '.' + this.token] = JSON.stringify(setting)
+          if (this.remember) localStorage[window.location.pathname + window.location.hash + '.' + this.token] = JSON.stringify(setting)
           this.$emit('setting', setting)
         })
       },
@@ -625,7 +625,7 @@ export default defineComponent({
     window.addEventListener('wheel', this.mousewheel, {passive: false})
 
     if (this.remember) {
-      const saved = localStorage[window.location.pathname + '.' + this.token]
+      const saved = localStorage[window.location.pathname + window.location.hash + '.' + this.token]
       if (saved) {
         const data = JSON.parse(saved)
         if (data.colHash === this.colHash)
@@ -1643,7 +1643,7 @@ export default defineComponent({
       window.removeEventListener('mousemove', this.colSepMouseMove)
       window.removeEventListener('mouseup', this.colSepMouseUp)
       const setting = this.getSetting()
-      if (this.remember) localStorage[window.location.pathname + '.' + this.token] = JSON.stringify(setting)
+      if (this.remember) localStorage[window.location.pathname + window.location.hash + '.' + this.token] = JSON.stringify(setting)
       this.$emit('setting', setting)
     },
 

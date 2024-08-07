@@ -885,9 +885,11 @@ of each group. If this is the case, you could use grouping attribute. For exampl
   ])
 ```
 
-All field set to be grouping will be set as readonly and hide duplication by default.
+The above shows the way in specifying 2 groups (region + area). Both group set to collapse by default.
 
 ![Grouping](https://i.imgur.com/g5XnsbF.png "Grouping")
+
+All field set to be grouping will be set as readonly and hide duplication by default.
 
 ### Localization
 
