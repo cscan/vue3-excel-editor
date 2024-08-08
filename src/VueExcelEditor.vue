@@ -1724,7 +1724,7 @@ export default defineComponent({
       const name = field.name
       setTimeout(() => {
         let sorting = field.sorting
-        if (sorting === null) {
+        if (!sorting) {
           if (field.type === 'number')
             sorting = (a, b) => {
               if (Number(a) > Number(b)) return 1
