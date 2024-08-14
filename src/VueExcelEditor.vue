@@ -115,6 +115,7 @@
                     link: item.link && item.isLink && item.isLink(record),
                     select: item.options,
                     grouping: item.grouping,
+                    expand: item.grouping && ungroup[item.name + record[item.name]],
                     datepick: item.type == 'date',
                     stickyColumn: item.sticky,
                     hideDuplicate: item.hideDuplicate && rowPos > 0 && isSameSinceLeft(p, record, pagingTable[rowPos-1]),
@@ -3092,11 +3093,15 @@ input:focus, input:active:focus, input.active:focus {
   border-right: 1px solid rgb(61, 85, 61) !important;
 }
 .systable tbody td.grouping {
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAlmVYSWZNTQAqAAAACAAFARIAAwAAAAEAAQAAARoABQAAAAEAAABKARsABQAAAAEAAABSATEAAgAAABEAAABah2kABAAAAAEAAABsAAAAAAAAAGAAAAABAAAAYAAAAAF3d3cuaW5rc2NhcGUub3JnAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAADaADAAQAAAABAAAADQAAAAC2lhxrAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADBGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+CiAgICAgICAgIDxleGlmOlBpeGVsWURpbWVuc2lvbj44MjwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOlBpeGVsWERpbWVuc2lvbj44MjwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOkNvbG9yU3BhY2U+MTwvZXhpZjpDb2xvclNwYWNlPgogICAgICAgICA8dGlmZjpYUmVzb2x1dGlvbj45NjwvdGlmZjpYUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6WVJlc29sdXRpb24+OTY8L3RpZmY6WVJlc29sdXRpb24+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+d3d3Lmlua3NjYXBlLm9yZzwveG1wOkNyZWF0b3JUb29sPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4K/79DmAAAARFJREFUKBWFks9KQkEUh70h9EdwY6abFhcUxK1P4EqsoKezB+gNjDDa1FO40YVoG7V1URDo940zUkT0g++ec+ecM85vrllhpyLhK+Z94gVU4RVG8AAq9B2khJjDGG7hDNYx+u66dTd2MMiFTxjsXn89b1j5APv2cicLKoNjaMfou7JuX5AePIpKDRXyBZy6iNK6HvueT9PPoI7gBBpwGOOG+AYe7wkuHdL0EtQ5PEIJyjCEd+jBBFZQc8ifrIN6gQ404Q6uYQoOqhrYX/jL05ya3tR3T9oJ8lYGMbdBXy3wFtOAdfv2ysn++07W7Qu76Msv7cI9VMHbDKaJXdDHFcygmPFQadBcj57bW13DCH7897YprztHz5xxRwAAAABJRU5ErkJggg==');
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAxUlEQVQ4EbWSXQoCMQyEuyqCB1K8/6MeSNCt63zQlrRNxBcDZaeTye92Sb7tRF90TsX90Pem8y739kHo2SJybxxguMmiBAg3o7bY0Cl9S9AJo0uUwKvocemgzCSx8yGEtxwYbh34DcdVhyXZCjWgJsFH8KjJZK2/SrCzUXzsvOUS7cDTuhwd8Eh+GeEl3dhVZsZoiWf5attP4bvOtEQ6mJ5nEdpqYIInbbSDun3FNPO4/71EytqKFreWANEIzJyNEmx30lwfVOglX/lm6bgAAAAASUVORK5CYII=');
   background-repeat: no-repeat;
   background-size: 8px 8px;
   background-position: right 5px top 8px;
 }
+.systable tbody td.grouping.expand {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAN0lEQVQ4EWNgGPKAEegDEB44ALKdixLrWYCazSgxgIkSzSC9A28AxYFIaRCAE9HAJiSKvUCxAQDacQBbsWXD+AAAAABJRU5ErkJggg==');
+}
+
 .systable tbody td.select:not(.readonly) {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAASUExURQAAANra2tfX19ra2tnZ2dnZ2c8lDs8AAAAFdFJOUwAwQL/PKlwehgAAAAlwSFlzAAAXEQAAFxEByibzPwAAAEdJREFUKFNdyskBACAIA8F49d+yiBEh+9rHYC5poPGiDmUDUGZI2EHCHBV2UWFEiT2UWKBgHwVLiCwjsoKcVeRMkDFFxoiADdH4AyvGhvOPAAAAAElFTkSuQmCC');
   background-repeat: no-repeat;
@@ -3416,6 +3421,7 @@ a:disabled {
 }
 td.hideDuplicate:not(.focus) {
   border-top: 1px solid transparent !important;
+  background-image: none !important;
   color: transparent;
   text-shadow: none;
 }
