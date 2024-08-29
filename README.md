@@ -103,6 +103,8 @@ In your template
 | disable-panel-setting | Optional  | Boolean  | Hide the setting panel |
 | disable-panel-filter  | Optional  | Boolean  | Hide the filter panel |
 | no-mouse-scroll       | Optional  | Boolean  | Disable the vertical scrolling by mouse |
+| no-sorting            | Optional  | Boolean  | Disable the sorting |
+| no-mass-update        | Optional  | Boolean  | Disable mass update of selected records |
 
 ### Prop Component: vue-excel-column
 
@@ -136,6 +138,7 @@ In your template
 | to-text        | Optional  | Function          | The function to convert from object value to edit-text |
 | to-value       | Optional  | Function          | The function to convert from edit-text to object value |
 | placeholder    | Optional  | String            | The custom text if the field is null |
+| no-sorting     | Optional  | Boolean           | Disable the sorting of the column |
 
 @ - Function can return a promise
 

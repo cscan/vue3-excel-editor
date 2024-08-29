@@ -132,7 +132,7 @@
           </tbody>
           <tfoot>
             <tr v-show="pagingTable.length && summaryRow">
-              <td class="row-summary first-col">&nbsp;</td>
+              <td class="row-summary first-col" :class="{'hide': noNumCol}">&nbsp;</td>
               <td v-for="(field, p) in fields"
                   v-show="!field.invisible"
                   class="row-summary"
@@ -212,8 +212,8 @@
       <!-- Footer -->
       <div ref="footer" class="footer center-text" :class="{hide: noFooter}" style="position:relative" @mousedown="ftMouseDown">
         <div ref="hScroll" class="h-scroll" @mousedown="sbMouseDown" />
-        <span class="left-block"></span>
-        <span v-show="!noPaging" style="position: absolute; left: 46px">
+        <span class="left-block" :class="{'hide': noNumCol}"></span>
+        <span v-show="!noPaging" class="footer-left">
           <span v-html="localizedLabel.footerLeft(pageTop + 1, pageBottom, table.length)"></span>
         </span>
         <span v-show="!noPaging && pageBottom - pageTop < table.length">
@@ -248,7 +248,7 @@
             </a>
           </template>
         </span>
-        <span style="position: absolute; right: 6px">
+        <span class="footer-right">
           <a :class="{disabled: !showSelectedOnly && selectedCount <= 1}" @mousedown="toggleSelectView">
             <span v-html="localizedLabel.footerRight.selected" />
             <span :style="{color: selectedCount>0 ? 'red': 'inherit'}">{{ selectedCount }}</span>
@@ -330,6 +330,7 @@ export default defineComponent({
     noFinding: {type: Boolean, default: false},
     noFindingNext: {type: Boolean, default: false},
     noSorting: {type: Boolean, default: false},
+    noMassUpdate: {type: Boolean, default: false},
     filterRow: {type: Boolean, default: false},
     freeSelect: {type: Boolean, default: false},
     noFooter: {type: Boolean, default: false},
@@ -485,6 +486,10 @@ export default defineComponent({
     return dataset
   },
   computed: {
+    numColWidth () {
+      if (this.noNumCol) return 0
+      else return 40
+    },
     selectedCount: {
       get () {
         return this._selectedCount
@@ -1098,12 +1103,15 @@ export default defineComponent({
       const count = doFields.length
       if (!count) return
 
-      const fullWidth = this.editor.getBoundingClientRect().width
-      const viewWidth = this.fields.filter(f => !f.invisible).reduce((c, f) => c - -f.width.replace(/px$/, ''), 0)
-        + (this.noNumCol ? 0 : 40)
-      const fillWidth = viewWidth - fullWidth + 2
-      if (fillWidth)
-        doFields.forEach(f => f.width = (f.width.replace(/px$/, '') - fillWidth / count) + 'px')
+      setTimeout(() => {
+        const fullWidth = this.editor.getBoundingClientRect().width
+        let viewWidth = this.fields.filter(f => !f.invisible).reduce((c, f) => c - -f.width.replace(/px$/, ''), 0)
+        viewWidth += this.numColWidth
+        if (this.tableContent.scrollHeight > this.tableContent.clientHeight) viewWidth += 13
+        const fillWidth = viewWidth - fullWidth + 2
+        if (fillWidth)
+          doFields.forEach(f => f.width = (f.width.replace(/px$/, '') - fillWidth / count) + 'px')
+      })
     },
 
     /* *** Date Picker *********************************************************************************
@@ -1157,7 +1165,7 @@ export default defineComponent({
     calVScroll () {
       let d = this.labelTr.getBoundingClientRect().height
       if (this.filterRow) d += 29
-      this.vScroller.top = d
+      this.vScroller.top = d - 1
       if (!this.noFooter) d += 25
       if (this.summaryRow) d += 27
       const fullHeight = this.$el.getBoundingClientRect().height
@@ -1239,7 +1247,7 @@ export default defineComponent({
      */
     ftMouseDown (e) {
       const footerRect = this.footer.getBoundingClientRect()
-      const ratio = (e.x - footerRect.left - 40) / (footerRect.width - 40)
+      const ratio = (e.x - footerRect.left - this.numColWidth) / (footerRect.width - this.numColWidth)
       const fullWidth = this.systable.getBoundingClientRect().width
       const viewWidth = this.tableContent.getBoundingClientRect().width
       this.tableContent.scrollTo(fullWidth * ratio - viewWidth / 2, this.tableContent.scrollTop)
@@ -1248,7 +1256,7 @@ export default defineComponent({
       e.stopPropagation()
       if (!this.hScroller.mouseX) {
         const sleft = this.$refs.hScroll.getBoundingClientRect().left
-        const fleft = this.footer.getBoundingClientRect().left + 40
+        const fleft = this.footer.getBoundingClientRect().left + this.numColWidth
         this.hScroller.left = sleft - fleft
         this.hScroller.mouseX = e.clientX
         window.addEventListener('mousemove', this.sbMouseMove)
@@ -1707,8 +1715,10 @@ export default defineComponent({
         e.preventDefault()
         if (this.sortPos === colPos && this.sortDir > 0)
           this.sort(-1, colPos)
-        else
+        else if (this.sortDir === 0)
           this.sort(1, colPos)
+        else
+          this.sort(0, colPos)
       }
     },
     completeHeaderChange (e) {
@@ -1738,11 +1748,17 @@ export default defineComponent({
               return String(a).localeCompare(String(b))
             }
         }
-        this.modelValue.sort((a, b) => {
-          if (field.sort) return field.sort(a, b) * -n
-          else return sorting(a[name], b[name]) * -n
-        })
-        this.sortPos = colPos
+        if (n === 0) {
+          this.modelValue.sort((a, b) => a.$id > b.$id ? 1 : -1)
+          this.sortPos = 0
+        }
+        else {
+          this.modelValue.sort((a, b) => {
+            if (field.sort) return field.sort(a, b) * -n
+            else return sorting(a[name], b[name]) * -n
+          })
+          this.sortPos = colPos
+        }
         this.sortDir = n
         this.refresh()
         this.processing = false
@@ -1758,7 +1774,7 @@ export default defineComponent({
         this.hScroller.tableUnseenWidth = fullWidth - viewWidth
         this.$refs.hScroll.style.width = (100 * viewWidth / fullWidth) + '%'
         const scrollerWidth = this.$refs.hScroll.getBoundingClientRect().width
-        this.hScroller.scrollerUnseenWidth = this.footer.getBoundingClientRect().width - 40 - scrollerWidth
+        this.hScroller.scrollerUnseenWidth = this.footer.getBoundingClientRect().width - this.numColWidth - scrollerWidth
       }
       if (!this.noPaging) {
         const offset = this.summaryRow ? 60 : 35
@@ -2297,7 +2313,7 @@ export default defineComponent({
         this.currentField = this.fields[colPos]
         this.currentCell = row.children[colPos + 1]
         this.currentRecord = this.table[this.pageTop + rowPos]
-        this.$emit('cell-click', {rowPos, colPos})
+        this.$emit('cell-click', {rowPos, colPos}, this.currentCell.textContent, this.currentRecord, this.currentField, this)
         if (typeof this.currentField.cellClick === 'function')
           this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
         if (this.currentField && this.currentField.link /* && e.altKey */ && this.currentCell.textContent)
@@ -2517,7 +2533,7 @@ export default defineComponent({
       let field = this.currentField
       if (typeof colPos !== 'undefined') field = this.fields[colPos]
       if (typeof recPos === 'undefined') recPos = this.pageTop + this.currentRowPos
-      if (typeof this.selected[recPos] !== 'undefined')
+      if (!this.noMassUpdate && typeof this.selected[recPos] !== 'undefined')
         this.updateSelectedRows(field, setText)
       else
         this.updateCell(recPos, field, field.toValue(setText, this.table[recPos], field))
@@ -2998,10 +3014,8 @@ input:focus, input:active:focus, input.active:focus {
   border: 0;
   border-collapse: separate;
   border-spacing: 0;
-  /*
   margin-bottom: -1px;
   border-bottom: 1px solid lightgray;
-  */
 }
 .systable .last-col {
   width: 12px;
@@ -3200,12 +3214,21 @@ input:focus, input:active:focus, input.active:focus {
   background-color: #e9ecef;
   border-right: 1px solid lightgray;
 }
+.footer-left {
+  position: absolute;
+  left: calc(v-bind(numColWidth)*1px);
+  margin-left: 6px;
+}
+.footer-right {
+  position: absolute;
+  right: 6px;
+}
 .h-scroll {
   z-index: -1;
   position: absolute;
   background-color: #f4f6f9;
   height: 25px;
-  margin-left: 40px;
+  margin-left: calc(v-bind(numColWidth)*1px);
   width: 65%;
   cursor: pointer;
 }
