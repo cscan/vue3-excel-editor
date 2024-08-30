@@ -1776,16 +1776,36 @@ export default defineComponent({
         const scrollerWidth = this.$refs.hScroll.getBoundingClientRect().width
         this.hScroller.scrollerUnseenWidth = this.footer.getBoundingClientRect().width - this.numColWidth - scrollerWidth
       }
+
+      let outerElement = this.editor.parentElement
+      let bottomOffset = 0
+      while (outerElement && !outerElement.style.height && outerElement.style.height !== 'auto') {
+        const style = getComputedStyle(outerElement)
+        bottomOffset += parseInt(style.marginBottom)
+        bottomOffset += parseInt(style.paddingBottom)
+        bottomOffset += parseInt(style.borderBottomWidth)
+        outerElement = outerElement.parentElement
+      }
+      if (outerElement) {
+        bottomOffset += parseInt(style.paddingBottom)
+        bottomOffset += parseInt(style.borderBottomWidth)
+      }
+
+      const outerHeight = outerElement?.clientHeight || window.innerHeight
+      const outerTop = outerElement?.getBoundingClientRect().top || 0
+
       if (!this.noPaging) {
-        const offset = this.summaryRow ? 60 : 35
-        let controlHeight = window.innerHeight - this.recordBody.getBoundingClientRect().top - offset
-        const height = this.height.replace(/px/,'') * 1 + this.systable.getBoundingClientRect().top - this.recordBody.getBoundingClientRect().top
-        if (this.height && controlHeight > height) controlHeight = height
+        const offset = bottomOffset + (this.summaryRow ? 25 : 0) + (this.noFooter ? 0 : 25)
+        let controlHeight = outerHeight - (this.recordBody.getBoundingClientRect().top - outerTop) - offset
+
+        if (this.height) {
+          const height = parseInt(this.height) + this.systable.getBoundingClientRect().top - this.recordBody.getBoundingClientRect().top
+          if (controlHeight > height) controlHeight = height
+        }
         this.pageSize = this.page || Math.floor(controlHeight / 24)
-        // this.pageSize = this.page || Math.floor((this.systable.parentNode.style.height - this.recordBody.getBoundingClientRect().top - offset) / 24)
       }
       else if (this.height === 'auto') {
-        let h = Math.floor((window.innerHeight - this.tableContent.getBoundingClientRect().top - 25))
+        let h = Math.floor(window.innerHeight - this.tableContent.getBoundingClientRect().top - 25)
         let offset = 4
         if (this.filterRow) offset += 29
         if (this.summaryRow) offset += 25
@@ -3216,8 +3236,11 @@ input:focus, input:active:focus, input.active:focus {
 }
 .footer-left {
   position: absolute;
-  left: calc(v-bind(numColWidth)*1px);
+  left: 40px;
   margin-left: 6px;
+}
+.no-number .footer-left {
+  left: 0px;
 }
 .footer-right {
   position: absolute;
@@ -3228,9 +3251,12 @@ input:focus, input:active:focus, input.active:focus {
   position: absolute;
   background-color: #f4f6f9;
   height: 25px;
-  margin-left: calc(v-bind(numColWidth)*1px);
+  margin-left: 40px;
   width: 65%;
   cursor: pointer;
+}
+.no-number .h-scroll {
+  margin-left: 0px;
 }
 .h-scroll:hover, .h-scroll.focus, .footer:hover .h-scroll {
   background-color: lightgray;
