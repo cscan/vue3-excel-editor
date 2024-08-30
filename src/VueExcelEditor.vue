@@ -1787,6 +1787,7 @@ export default defineComponent({
         outerElement = outerElement.parentElement
       }
       if (outerElement) {
+        const style = getComputedStyle(outerElement)
         bottomOffset += parseInt(style.paddingBottom)
         bottomOffset += parseInt(style.borderBottomWidth)
       }
