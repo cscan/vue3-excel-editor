@@ -2331,9 +2331,14 @@ export default defineComponent({
         const row = e.target.parentNode
         const colPos = Array.from(row.children).indexOf(e.target) - 1
         const rowPos = Array.from(row.parentNode.children).indexOf(row)
+
+        if (colPos !== this.currentColPos || rowPos !== this.currentRowPos)
+          this.inputBoxBlur()
+
         this.currentField = this.fields[colPos]
         this.currentCell = row.children[colPos + 1]
         this.currentRecord = this.table[this.pageTop + rowPos]
+
         this.$emit('cell-click', {rowPos, colPos}, this.currentCell.textContent, this.currentRecord, this.currentField, this)
         if (typeof this.currentField.cellClick === 'function')
           this.currentField.cellClick(this.currentCell.textContent, this.currentRecord, rowPos, colPos, this.currentField, this)
@@ -2344,6 +2349,7 @@ export default defineComponent({
           this.refresh()
           return
         }
+
         setTimeout(() => this.inputBox.focus())
         this.focused = true
         this.moveInputSquare(rowPos, colPos)
