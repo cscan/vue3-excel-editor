@@ -1103,14 +1103,14 @@ export default defineComponent({
       const count = doFields.length
       if (!count) return
 
-      setTimeout(() => {
-        const fullWidth = this.editor.getBoundingClientRect().width
-        let viewWidth = this.fields.filter(f => !f.invisible).reduce((c, f) => c - -f.width.replace(/px$/, ''), 0)
+      this.lazy(() => {
+        let fullWidth = this.editor.getBoundingClientRect().width
+        let viewWidth = this.fields.filter(f => !f.invisible).reduce((c, f) => c + parseFloat(f.width), 0)
         viewWidth += this.numColWidth
-        if (this.tableContent.scrollHeight > this.tableContent.clientHeight) viewWidth += 13
+        if (this.vScroller.buttonHeight < this.vScroller.height) fullWidth -= 13
         const fillWidth = viewWidth - fullWidth + 2
-        if (fillWidth)
-          doFields.forEach(f => f.width = (f.width.replace(/px$/, '') - fillWidth / count) + 'px')
+        if (Math.abs(fillWidth) > 1)
+          doFields.forEach(f => f.width = (parseFloat(f.width) - fillWidth / count) + 'px')
       })
     },
 
@@ -2770,6 +2770,13 @@ export default defineComponent({
         this.$emit('validate-error', '', row)
         if (selector) selector.classList.remove('error')
       }
+    },
+    validateAll() {
+      this.errmsg = {}
+      this.rowerr = {}
+      return Promise.all(this.table.map(row => 
+        Promise.all(Object.keys(row).map(name => this.updateCell(row, name, row[name], false))
+      )))
     },
 
     /* *** Autocomplete ****************************************************************************************
