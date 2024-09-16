@@ -620,7 +620,7 @@ export default defineComponent({
       this.calStickyLeft()
     }, 200)
 
-    if (ResizeObserver) new ResizeObserver(this.winResize).observe(this.tableContent)
+    if (ResizeObserver) new ResizeObserver(this.winResize).observe(this.editor)
     window.addEventListener('resize', this.winResize)
     window.addEventListener('paste', this.winPaste)
     window.addEventListener('keydown', this.winKeydown)
@@ -1777,14 +1777,16 @@ export default defineComponent({
         this.hScroller.scrollerUnseenWidth = this.footer.getBoundingClientRect().width - this.numColWidth - scrollerWidth
       }
 
-      let outerElement = this.editor.parentElement
+      let outerElement = this.editor
       let bottomOffset = 0
-      while (outerElement && !outerElement.style.height && outerElement.style.height !== 'auto') {
-        const style = getComputedStyle(outerElement)
-        bottomOffset += parseInt(style.marginBottom)
-        bottomOffset += parseInt(style.paddingBottom)
-        bottomOffset += parseInt(style.borderBottomWidth)
-        outerElement = outerElement.parentElement
+      if (this.height !== 'auto') {
+        while (outerElement && !outerElement.style.height && outerElement.style.height !== 'auto') {
+          const style = getComputedStyle(outerElement)
+          bottomOffset += parseInt(style.marginBottom)
+          bottomOffset += parseInt(style.paddingBottom)
+          bottomOffset += parseInt(style.borderBottomWidth)
+          outerElement = outerElement.parentElement
+        }
       }
       if (outerElement) {
         const style = getComputedStyle(outerElement)
@@ -1800,8 +1802,15 @@ export default defineComponent({
         let controlHeight = outerHeight - (this.recordBody.getBoundingClientRect().top - outerTop) - offset
 
         if (this.height) {
-          const height = parseInt(this.height) + this.systable.getBoundingClientRect().top - this.recordBody.getBoundingClientRect().top
-          if (controlHeight > height) controlHeight = height
+          if (this.height === 'auto') {
+            const p = this.editor.parentElement
+            if (p && p.scrollHeight > p.clientHeight)
+              controlHeight += p.clientHeight - p.scrollHeight
+          }
+          else {
+            const height = parseInt(this.height) + this.systable.getBoundingClientRect().top - this.recordBody.getBoundingClientRect().top
+            if (controlHeight > height) controlHeight = height
+          }
         }
         this.pageSize = this.page || Math.floor(controlHeight / 24)
       }
