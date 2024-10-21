@@ -117,7 +117,7 @@
                     grouping: item.grouping,
                     expand: item.grouping && ungroup[item.name + record[item.name]],
                     datepick: item.type == 'date',
-                    stickyColumn: item.sticky,
+                    'sticky-column': item.sticky,
                     hideDuplicate: item.hideDuplicate && rowPos > 0 && isSameSinceLeft(p, record, pagingTable[rowPos-1]),
                   }"
                   :key="p"
@@ -587,13 +587,14 @@ export default defineComponent({
       this.$emit('page-changed', this.pageTop, this.pageTop + newVal - 1)
     }
   },
+  activated () {
+    this.addEventListener()
+  },
+  deactivated () {
+    this.removeEventListener()
+  },
   beforeUnmount () {
-    window.removeEventListener('resize', this.winResize)
-    window.removeEventListener('paste', this.winPaste)
-    window.removeEventListener('keydown', this.winKeydown)
-    window.removeEventListener('keyup', this.winKeyup)
-    window.removeEventListener('scroll', this.winScroll)
-    window.removeEventListener('wheel', this.mousewheel)
+    this.removeEventListener()
   },
   mounted () {
     this.editor = this.$refs.editor
@@ -621,12 +622,7 @@ export default defineComponent({
     }, 200)
 
     if (ResizeObserver) new ResizeObserver(this.winResize).observe(this.editor)
-    window.addEventListener('resize', this.winResize)
-    window.addEventListener('paste', this.winPaste)
-    window.addEventListener('keydown', this.winKeydown)
-    window.addEventListener('keyup', this.winKeyup)
-    window.addEventListener('scroll', this.winScroll)
-    window.addEventListener('wheel', this.mousewheel, {passive: false})
+    this.addEventListener()
 
     if (this.remember) {
       const saved = localStorage[window.location.pathname + window.location.hash + '.' + this.token]
@@ -638,6 +634,22 @@ export default defineComponent({
     }
   },
   methods: {
+    addEventListener () {
+      window.addEventListener('resize', this.winResize)
+      window.addEventListener('paste', this.winPaste)
+      window.addEventListener('keydown', this.winKeydown)
+      window.addEventListener('keyup', this.winKeyup)
+      window.addEventListener('scroll', this.winScroll)
+      window.addEventListener('wheel', this.mousewheel, {passive: false})
+    },
+    removeEventListener () {
+      window.removeEventListener('resize', this.winResize)
+      window.removeEventListener('paste', this.winPaste)
+      window.removeEventListener('keydown', this.winKeydown)
+      window.removeEventListener('keyup', this.winKeyup)
+      window.removeEventListener('scroll', this.winScroll)
+      window.removeEventListener('wheel', this.mousewheel)
+    },
     isSameSinceLeft(p, rec1, rec2) {
       for(let i=0; i<=p; i++) {
         if (!this.fields[i].invisible && this.fields[i].hideDuplicate) {
@@ -1110,7 +1122,10 @@ export default defineComponent({
         if (this.vScroller.buttonHeight < this.vScroller.height) fullWidth -= 13
         const fillWidth = viewWidth - fullWidth + 2
         if (Math.abs(fillWidth) > 1)
-          doFields.forEach(f => f.width = (parseFloat(f.width) - fillWidth / count) + 'px')
+          doFields.forEach(f => {
+            const w = parseFloat(f.width) - fillWidth / count
+            f.width = (w > parseFloat(f.origWidth) ? w : parseFloat(f.origWidth)) + 'px'
+          })
       })
     },
 

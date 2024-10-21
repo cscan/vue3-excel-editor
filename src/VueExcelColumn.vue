@@ -247,6 +247,7 @@ export default {
         label: this.label === null ? this.field : this.label,
         type: this.type,
         width: this.width,
+        origWidth: this.width,
         autoFillWidth: this.autoFillWidth,
 
         validate: validate,
