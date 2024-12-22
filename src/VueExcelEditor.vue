@@ -1456,11 +1456,16 @@ export default defineComponent({
               }
             }
             else {
-              if (!this.moveEast(e)) {
-                if (this.moveSouth(e))
-                  this.moveToWest(e)
-                else
-                  return this.inputBoxBlur()
+              if (this.autocompleteSelect !== -1 && this.autocompleteSelect < this.autocompleteInputs.length) {
+                  this.inputAutocompleteText(this.autocompleteInputs[this.autocompleteSelect])
+              }
+              else {
+                  if (!this.moveEast(e)) {
+                      if (this.moveSouth(e))
+                          this.moveToWest(e)
+                      else
+                          return this.inputBoxBlur()
+                  }
               }
             }
             e.preventDefault()
