@@ -183,6 +183,7 @@ In your template
 | select         | selectIdArray, direction    | Emit when rows are selected/unselected |
 | cell-click     | rowPos, colPos              | Emit when a cell be clicked before focus |
 | cell-focus     | {rowPos, colPos, cell, rec} | Emit when a cell got focus |
+| cell-blur      | {rowPos, colPos, cell, rec} | Emit when a cell got blur |
 | page-changed   | pageTopPos, pageBottomPos   | Emit when the page has changed |
 | setting        | setting                     | Emit when setting (column width, invisible state) is changed |
 | validate-error | error, row, field           | Emit when validation (both field and row level) occured |

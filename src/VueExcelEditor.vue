@@ -545,8 +545,13 @@ export default defineComponent({
     }
   },
   watch: {
-    modelValue () {
+    modelValue (val) {
       this.lazy(() => {
+        if (val.length === 0) {
+          this.clearFilter()
+          this.sortPos = 0
+          this.sortDir = 0
+        } 
         this.refresh()
         if (this.pageTop > this.table.length)
           this.lastPage()
@@ -1360,7 +1365,8 @@ export default defineComponent({
         this.inputBoxChanged = true
         return
       }
-      const text = (e.originalEvent || e).clipboardData.getData('text/plain')
+      let text = (e.originalEvent || e).clipboardData.getData('text/plain')
+      text = text.replace(/^\s+|\s+$/g, '')
       this.inputCellWrite(text)
       e.preventDefault()
     },
@@ -2528,6 +2534,7 @@ export default defineComponent({
       this.currentColPos = colPos
       this.currentCell = cell
       this.currentRecord = this.table[top + rowPos]
+      this.lastRecord = this.currentRecord
 
       this.$emit('cell-focus', {rowPos, colPos, cell, record: this.currentRecord})
       this.currentCell.classList.add('focus')
@@ -2594,6 +2601,9 @@ export default defineComponent({
       if (this.$refs.dpContainer.querySelector(':hover')) return
       this.inputBoxComplete()
       this.focused = false
+
+      this.$emit('cell-blur', {rowPos: this.currentRowPos, colPos: this.currentColPos, cell: this.lastCell, record: this.lastRecord})
+  
       if (this.currentRowPos !== -1 && this.currentRowPos < this.recordBody.children.length) {
         this.recordBody.children[this.currentRowPos].children[0].classList.remove('focus')
         this.labelTr.children[this.currentColPos + 1].classList.remove('focus')
