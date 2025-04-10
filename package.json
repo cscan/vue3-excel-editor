@@ -7,7 +7,7 @@
   "dependencies": {
     "@vuepic/vue-datepicker": "^3.3.0",
     "vuedraggable": "^4.1.0",
-    "xlsx": "^0.18.5"
+    "@e965/xlsx": "^0.20.3"
   },
   "repository": {
     "type": "git",
