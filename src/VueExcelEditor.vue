@@ -2783,7 +2783,7 @@ export default defineComponent({
     },
     setFieldError (error, row, field) {
       const id = `id-${row.$id}-${field.name}`
-      const selector = this.systable.querySelector('td#'+id)
+      const selector = this.systable.querySelector(`td[id="${id}"]`)
       if (error) {
         this.errmsg[id] = error
         this.$emit('validate-error', error, row, field)
@@ -2798,7 +2798,7 @@ export default defineComponent({
     },
     setRowError (error, row) {
       const rid = `rid-${row.$id}`
-      const selector = this.systable.querySelector('td#'+rid)
+      const selector = this.systable.querySelector(`td[id="${rid}"]`)
       if (error) {
         this.rowerr[rid] = error
         this.$emit('validate-error', error, row)
